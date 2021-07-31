@@ -5,6 +5,7 @@
 [ext_resource path="res://scenes/consoleWindow.gd" type="Script" id=3]
 
 [node name="HBoxContainer" type="HBoxContainer"]
+modulate = Color( 1, 1, 1, 0.501961 )
 margin_right = 500.0
 margin_bottom = 250.0
 script = ExtResource( 3 )
@@ -13,8 +14,9 @@ __meta__ = {
 }
 
 [node name="consoleLabel" type="Label" parent="."]
-margin_right = 484.0
+margin_right = 550.0
 margin_bottom = 250.0
+rect_min_size = Vector2( 550, 250 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/normal = ExtResource( 1 )
@@ -31,8 +33,8 @@ __meta__ = {
 }
 
 [node name="consoleScrollBar" type="VScrollBar" parent="."]
-margin_left = 488.0
-margin_right = 500.0
+margin_left = 554.0
+margin_right = 566.0
 margin_bottom = 250.0
 
 [connection signal="scrolling" from="consoleScrollBar" to="." method="_on_consoleScrollBar_scrolling"]

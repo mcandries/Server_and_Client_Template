@@ -5,3 +5,9 @@ static func array_slice_to_string (array : Array, from : int, to : int, separato
 	for i in range (from, to):
 		result += str (array [i]) + separator
 	return result
+
+static func change_scene (tree : SceneTree, scene : PackedScene):
+	var active_scene = tree.root.get_node("/root/RootScene/ActiveScene")
+	for n in active_scene.get_children():
+		n.queue_free()
+	active_scene.add_child(scene.instance())

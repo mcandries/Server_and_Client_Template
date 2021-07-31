@@ -26,6 +26,15 @@ func _ready():
 			self.print ( "Welcome to "+ ProjectSettings.get_setting("application/config/name")+" !")
 			break
 
+func _input(event):
+	if Input.is_action_just_pressed("k_f1"):
+		if is_instance_valid(console_window) :
+			console_window.visible = !console_window.visible
+
+#######
+####### Functions
+#######
+
 func print(value):
 	var l_text : String = str (value)
 	dbg_history.append_array( l_text.split('\n') )
@@ -55,7 +64,4 @@ func refresh():
 				max_index = dbg_history.size()
 			console_label.text = utils.array_slice_to_string(dbg_history, min_index, max_index, "\n")
 
-func _input(event):
-	if Input.is_action_just_pressed("k_f1"):
-		if is_instance_valid(console_window) :
-			console_window.visible = !console_window.visible
+
