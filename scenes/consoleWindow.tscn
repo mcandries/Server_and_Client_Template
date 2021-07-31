@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://ressources/gui/ConsoleWindow_styleboxflat.tres" type="StyleBox" id=1]
+[ext_resource path="res://ressources/fonts/ConsoleWindow_Fonts.tres" type="DynamicFont" id=2]
+[ext_resource path="res://scenes/consoleWindow.gd" type="Script" id=3]
+
+[node name="HBoxContainer" type="HBoxContainer"]
+margin_right = 500.0
+margin_bottom = 250.0
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="consoleLabel" type="Label" parent="."]
+margin_right = 484.0
+margin_bottom = 250.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/normal = ExtResource( 1 )
+custom_fonts/font = ExtResource( 2 )
+custom_colors/font_color = Color( 0.964706, 0.964706, 0.964706, 1 )
+custom_constants/line_spacing = 2
+text = "Welcome to MultiBack !
+"
+autowrap = true
+clip_text = true
+max_lines_visible = 12
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="consoleScrollBar" type="VScrollBar" parent="."]
+margin_left = 488.0
+margin_right = 500.0
+margin_bottom = 250.0
+
+[connection signal="scrolling" from="consoleScrollBar" to="." method="_on_consoleScrollBar_scrolling"]
