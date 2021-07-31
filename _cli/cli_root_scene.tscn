@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://_cli/scenes/cli_example_scene.tscn" type="PackedScene" id=1]
+[ext_resource path="res://_cli/cli_root_scene.gd" type="Script" id=2]
+
+[node name="RootScene" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="ActiveScene" type="Node2D" parent="."]
+
+[node name="Example" parent="ActiveScene" instance=ExtResource( 1 )]

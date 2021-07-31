@@ -2,6 +2,7 @@ extends Node
 
 ################################### Settings
 var srv_tree_process_divider = 1  #srv_tree is process as often as cli_tree
+const srv_tree_root_scene_path = "res://_srv/srv_root_scene.tscn"
 ###################################
 
 onready var cli_tree : SceneTree = get_tree()
@@ -33,10 +34,10 @@ func _ready():
 	#caught the main tree "screen_resized" to reset the srv_tree screen_stretch
 	get_tree().connect("screen_resized", self, "_on_screen_resized")
 
-	srv_tree.change_scene("res://_srv/scenes/srv_test_scene.tscn")
+	srv_tree.change_scene(srv_tree_root_scene_path)
 
 func _process(delta):
-	if (get_tree().get_frame() % srv_tree_process_divider) == 0
+	if (get_tree().get_frame() % srv_tree_process_divider) == 0:
 		#make server tree process alive
 		srv_tree.idle(delta)
 

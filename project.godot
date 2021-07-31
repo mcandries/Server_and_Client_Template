@@ -27,7 +27,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Server_and_Client_Template"
-run/main_scene="res://_cli/scenes/test_scene.tscn"
+run/main_scene="res://_cli/cli_root_scene.tscn"
 boot_splash/fullsize=false
 boot_splash/use_filter=false
 config/icon="res://icon.png"
