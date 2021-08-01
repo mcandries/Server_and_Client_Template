@@ -46,6 +46,19 @@ func print(value):
 
 	self.refresh()
 
+func prints(values : Array):
+	var concat_value = ""
+	
+	var j = 0
+	for i in values:
+		j += 1
+		concat_value += str (i)
+		if j<values.size():
+			concat_value += " "
+	
+	self.print (concat_value)
+	
+
 func refresh():
 	if is_instance_valid(console_window) :
 		if console_window.visible:

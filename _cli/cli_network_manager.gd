@@ -1,10 +1,16 @@
 extends Node
 
 var networkENet : NetworkedMultiplayerENet
+var nickname : String
 
 func _ready():
 	gb.cli_network_manager = self
 
+func _process(delta):
+#	if is_instance_valid(get_tree().network_peer):
+#		get_tree().network_peer.poll()
+	pass
+		
 
 #######
 ####### Functions
@@ -12,6 +18,7 @@ func _ready():
 
 func start_network_client (ip :="127.0.0.1", port := 12121, playername := "player_unkown"):
 	var err 
+	nickname = playername
 	networkENet = NetworkedMultiplayerENet.new()
 	cw.print("Connection to " + str(ip) + ":" + str(port) + " ...")
 	err = networkENet.create_client(ip,port)
@@ -20,6 +27,7 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 	else:
 		cw.print("Trying to connect...")
 		get_tree().network_peer = networkENet
+#		get_tree().multiplayer_poll = false
 		networkENet.connect("connection_failed", self, "_Connection_Failed")
 		networkENet.connect("connection_succeeded", self, "_Connection_Succeeded")
 		networkENet.connect("server_disconnected", self, "_Server_Disconnected")
@@ -44,9 +52,21 @@ func _Connection_Failed():
 	DisconnectFromServer()
 
 func _Connection_Succeeded():
+	#myPeerID = str(get_tree().get_network_unique_id())
 	cw.print("Client establish connection to server")
 
 func _Server_Disconnected():
 	cw.print("Client disconnected from server")
 	DisconnectFromServer()
 	#get_tree().change_scene("res://Menu.tscn")
+
+#######
+####### RPC Functions
+#######
+
+puppet func C_EMT_connected_player_info ():
+	rpc_id(1, "S_RCV_connected_player_info", { "player_name" : nickname})
+
+puppet func C_EMT_ping (server_initial_tick):
+	cw.prints(["cli emmit", get_tree().get_frame()])
+	rpc_unreliable_id (1, "S_RCV_ping", server_initial_tick, OS.get_ticks_msec())
