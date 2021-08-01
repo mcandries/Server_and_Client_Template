@@ -4,6 +4,8 @@ extends CenterContainer
 func _ready():
 	$VBox/VBoxJoinGameOption.visible = false
 	$VBox/VBoxAdvanced.visible = false
+	gb.cli_network_manager.connect("connected_to_server",self,"_on_connected_to_server")
+	gb.cli_network_manager.connect("disconnected_from_server", self, "_on_disconnected_from_server")
 
 
 func _on_ButtonSolo_pressed():
@@ -37,9 +39,10 @@ func _on_Port_text_changed(new_text :String):
 
 
 
+func _on_connected_to_server():
+	utils.change_scene(get_tree(), load ("res://_cli/scenes/cli_example_lobby.tscn"))
 
-
-
-
+func _on_disconnected_from_server():
+	pass
 
 

@@ -9,10 +9,20 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Node",
+"class": "Cli_Network_Manager",
+"language": "GDScript",
+"path": "res://_cli/cli_network_manager.gd"
+}, {
 "base": "",
 "class": "GitAPI",
 "language": "NativeScript",
 "path": "res://git_api.gdns"
+}, {
+"base": "Node",
+"class": "Srv_Network_Manager",
+"language": "GDScript",
+"path": "res://_srv/srv_network_manager.gd"
 }, {
 "base": "Object",
 "class": "TypeFormattingLogic",
@@ -20,7 +30,9 @@ _global_script_classes=[ {
 "path": "res://addons/metadata_inspector/TypeFormattingLogic.gd"
 } ]
 _global_script_class_icons={
+"Cli_Network_Manager": "",
 "GitAPI": "",
+"Srv_Network_Manager": "",
 "TypeFormattingLogic": ""
 }
 
@@ -49,10 +61,6 @@ window/size/width=1920
 window/size/height=1080
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
-
-[editor_plugins]
-
-enabled=PoolStringArray( "res://addons/metadata_inspector/plugin.cfg" )
 
 [gdnative]
 

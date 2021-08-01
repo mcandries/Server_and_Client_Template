@@ -25,10 +25,11 @@ func _ready():
 		srv_tree.root.set_physics_process(true)
 
 		#set viewport options
-		srv_tree_viewport.size = Vector2 (0,0)  # to hide viewport elsewise it draw on top of the main scenetree
 		srv_tree_viewport.render_direct_to_screen = false
 		srv_tree_viewport.transparent_bg = false
 		srv_tree_viewport.render_direct_to_screen = false
+		srv_tree_viewport.size = get_tree().root.size
+		srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED # to hide viewport elsewise it draw on top of the main scenetree
 		
 		#caught the main tree "screen_resized" to reset the srv_tree screen_stretch
 		get_tree().connect("screen_resized", self, "_on_screen_resized")
@@ -52,10 +53,10 @@ func _input(event):
 		if Input.is_action_just_pressed("k_f12"):
 			srv_tree_visible = !srv_tree_visible
 			if srv_tree_visible:
-				srv_tree_viewport.size = get_tree().root.size
+				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
 				disabled_input_on_all_cli_Node2D()
 			else:
-				srv_tree_viewport.size = Vector2 (0,0)
+				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 				restore_input_on_all_cli_Node2D()
 		
 		if srv_tree_visible :
@@ -65,10 +66,7 @@ func _input(event):
 ####### Events
 #######
 func _on_screen_resized():
-	if not srv_tree_visible :
-		srv_tree_viewport.size = Vector2 (0,0)
-	else :
-		srv_tree_viewport.size = get_tree().root.size
+	srv_tree_viewport.size = get_tree().root.size
 
 #######
 ####### Functions

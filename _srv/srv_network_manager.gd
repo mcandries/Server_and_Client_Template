@@ -1,3 +1,4 @@
+class_name Srv_Network_Manager
 extends Node
 
 ################################### Settings
@@ -7,7 +8,7 @@ var latencyUpdateFrequency = 0.5  #in seconds
 ###################################
 
 var networkENet = NetworkedMultiplayerENet.new()
-var network_ready = false 
+var server_running = false 
 
 var upnp = UPNP.new()
 var upnpOpenedPort
@@ -20,19 +21,20 @@ var upnpPortDeleteResult
 
 var latencyTimer : Timer
 
-var connected_players = {}
+var players_list = {}
+
+const players_list_template = {
+	"player_name" : "",
+	"latency_last" : 0,
+	"net_latency_last" : 0,
+	"ready" : false,	
+}
 
 func _ready():
 	gb.srv_network_manager = self
-	pass
 
-func _notification(what):
-	pass
-	
 func _process(delta):
-#	if is_instance_valid(get_tree().network_peer):
-#		get_tree().network_peer.poll()
-	pass
+	get_tree().multiplayer.poll()
 
 #######
 ####### Functions
@@ -48,7 +50,7 @@ func start_network_server (local := true, port := 12121):
 		return
 
 	get_tree().network_peer = networkENet
-#	get_tree().multiplayer_poll = false
+	get_tree().multiplayer_poll = false
 	networkENet.connect("peer_connected", self, "_Peer_Connected")
 	networkENet.connect("peer_disconnected", self, "_Peer_Disconnected")
 	
@@ -79,14 +81,14 @@ func start_network_server (local := true, port := 12121):
 	self.add_child(latencyTimer)
 	latencyTimer.start()
 	cw.print("[SRV] Network server opened")
-	network_ready = true
+	server_running = true
 	
 	
 
 func StopServer():
 	networkENet.close_connection(0)
 	get_tree().network_peer = null
-	network_ready = false
+	server_running = false
 	if upnp_enable:
 		if upnpPortResult == upnp.UPNP_RESULT_SUCCESS:
 			upnpPortDeleteResult = upnp.delete_port_mapping(upnpOpenedPort)
@@ -98,39 +100,62 @@ func StopServer():
 
 
 func _Peer_Connected (peerId):
-	connected_players[peerId] = {}
+	players_list[peerId] = players_list_template.duplicate(true)
 	rpc_id(peerId, "C_EMT_connected_player_info")
 	cw.print("[SRV] New player connected ("+str(peerId) +")")
 
 func _Peer_Disconnected (peerId):
-	connected_players.erase(peerId)
+	players_list.erase(peerId)
+	players_list_updated()
 	cw.print("[SRV] Player disconnected ("+str(peerId) +")")
 
 func _on_latencyTimer_timeout():
-	cw.prints(["srv ask", get_tree().get_frame()])
+#	cw.prints(["srv ask", get_tree().get_frame()])
 	rpc_unreliable ("C_EMT_ping", OS.get_ticks_msec()) #call on all connected peer
-	get_tree().network_peer.poll()
+	get_tree().multiplayer.poll()
+	players_list_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
+
 
 #######
 ####### RPC Functions
 #######
 
+func players_list_updated():
+	#########################
+	######################### Should clean the players_list before sending it to peers
+	rpc ("C_RCV_players_list", players_list)
 
 remote func S_RCV_connected_player_info (player_infos):
 	var peerId = get_tree().get_rpc_sender_id()
+	players_list[peerId]["player_name"] = player_infos.player_name
+	players_list_updated()
+	cw.prints (["[SRV] Player connected", peerId, "is", players_list[peerId].player_name])
 
-	connected_players[peerId] = {
-		"player_name" : player_infos.player_name
-	}
-	cw.prints (["[SRV] Player connected", peerId, "is", connected_players[peerId].player_name])
+
+remote func S_RCV_player_ready_status (ready):
+	var peerId = get_tree().get_rpc_sender_id()
+	players_list[peerId]["ready"] = ready	
+	players_list_updated()
 
 remote func S_RCV_ping (server_initial_tick, client_tick):
 	var peerId = get_tree().get_rpc_sender_id()
-	
 	var final_tick = OS.get_ticks_msec()
-		
-	cw.prints(["srv receive", get_tree().get_frame(), server_initial_tick, client_tick, final_tick])
-	
-	if connected_players.has(peerId):
-		connected_players[peerId]["latency_last"] = clamp ( (final_tick - server_initial_tick)/2 ,0, INF)
-		cw.prints ([peerId, "last latency is", connected_players[peerId]["latency_last"] ])
+#	cw.prints(["srv receive", get_tree().get_frame(), server_initial_tick, client_tick, final_tick])
+	if players_list.has(peerId):
+		var latency
+		latency  = final_tick - server_initial_tick
+		latency /= 2.0 #we divide by 2 to have the "one way latency" 
+		latency = int(round(latency))
+		var net_latency
+		net_latency = latency - ((1.0 / Engine.get_frames_per_second())*1000)  #As godot process received rpc 1 time per process tick, we have for sure lost a frame tick
+		net_latency = int(round(net_latency))
+		players_list[peerId]["latency_last"] = clamp (latency, 0, INF)
+		players_list[peerId]["net_latency_last"] = clamp (net_latency, 0, INF)
+#		cw.prints ([peerId, "last latency is", players_list[peerId]["latency_last"], "net last latency", players_list[peerId]["net_latency_last"] ])
+
+
+remote func S_EMT_ping (client_initial_tick):
+	var peerId = get_tree().get_rpc_sender_id()
+	rpc_unreliable_id (peerId, "C_RCV_ping", client_initial_tick)
+	get_tree().multiplayer.poll()
+#	cw.print("S_EMT_ping")

@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/perfMonitor.gd" type="Script" id=1]
+[ext_resource path="res://ressources/themes/perfMonitor_theme.tres" type="Theme" id=2]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 2 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBox" type="HBoxContainer" parent="."]
+margin_right = 258.0
+margin_bottom = 18.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelFPS" type="Label" parent="HBox"]
+margin_right = 36.0
+margin_bottom = 18.0
+size_flags_vertical = 0
+text = "FPS:"
+valign = 1
+
+[node name="FPS" type="Label" parent="HBox"]
+margin_left = 40.0
+margin_right = 100.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 60, 0 )
+size_flags_vertical = 0
+text = "-"
+valign = 1
+
+[node name="LabelPing" type="Label" parent="HBox"]
+margin_left = 104.0
+margin_right = 149.0
+margin_bottom = 18.0
+size_flags_vertical = 0
+text = "Ping:"
+valign = 1
+
+[node name="Ping" type="Label" parent="HBox"]
+margin_left = 153.0
+margin_right = 213.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 60, 0 )
+size_flags_vertical = 0
+text = "-"
+valign = 1
+
+[node name="LabelTotalLatency" type="Label" parent="HBox"]
+margin_left = 217.0
+margin_right = 352.0
+margin_bottom = 18.0
+size_flags_vertical = 0
+text = "Total Latency :"
+valign = 1
+
+[node name="TotalLatency" type="Label" parent="HBox"]
+margin_left = 356.0
+margin_right = 416.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 60, 0 )
+size_flags_vertical = 0
+text = "-"
+valign = 1

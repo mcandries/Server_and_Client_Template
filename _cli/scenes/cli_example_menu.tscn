@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://_cli/ressources/themes/game_gui_theme.tres" type="Theme" id=1]
+[ext_resource path="res://ressources/themes/game_gui_theme.tres" type="Theme" id=1]
 [ext_resource path="res://_cli/scenes/cli_example_menu.gd" type="Script" id=2]
 
 [node name="Menu" type="CenterContainer"]
@@ -18,9 +18,9 @@ __meta__ = {
 
 [node name="VBox" type="VBoxContainer" parent="."]
 margin_left = 793.0
-margin_top = 344.0
+margin_top = 332.0
 margin_right = 1127.0
-margin_bottom = 736.0
+margin_bottom = 748.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
@@ -48,16 +48,27 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSolo" type="Button" parent="VBox"]
+[node name="MarginContainer4" type="MarginContainer" parent="VBox"]
 margin_top = 43.0
 margin_right = 334.0
-margin_bottom = 78.0
+margin_bottom = 63.0
+rect_min_size = Vector2( 0, 20 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSolo" type="Button" parent="VBox"]
+margin_top = 67.0
+margin_right = 334.0
+margin_bottom = 102.0
 text = "Play Solo"
 
 [node name="MarginContainer" type="MarginContainer" parent="VBox"]
-margin_top = 82.0
+margin_top = 106.0
 margin_right = 334.0
-margin_bottom = 102.0
+margin_bottom = 126.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -66,15 +77,15 @@ __meta__ = {
 }
 
 [node name="ButtonCreateGame" type="Button" parent="VBox"]
-margin_top = 106.0
+margin_top = 130.0
 margin_right = 334.0
-margin_bottom = 141.0
+margin_bottom = 165.0
 text = "Create Multiplayer Game"
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBox"]
-margin_top = 145.0
+margin_top = 169.0
 margin_right = 334.0
-margin_bottom = 165.0
+margin_bottom = 189.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -83,15 +94,15 @@ __meta__ = {
 }
 
 [node name="ButtonJoinGame" type="Button" parent="VBox"]
-margin_top = 169.0
+margin_top = 193.0
 margin_right = 334.0
-margin_bottom = 204.0
+margin_bottom = 228.0
 text = "Join Multiplayer Game"
 
 [node name="VBoxJoinGameOption" type="VBoxContainer" parent="VBox"]
-margin_top = 208.0
+margin_top = 232.0
 margin_right = 334.0
-margin_bottom = 286.0
+margin_bottom = 310.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox/VBoxJoinGameOption"]
 margin_right = 334.0
@@ -137,9 +148,9 @@ disabled = true
 text = "Join"
 
 [node name="MarginContainer3" type="MarginContainer" parent="VBox"]
-margin_top = 290.0
+margin_top = 314.0
 margin_right = 334.0
-margin_bottom = 310.0
+margin_bottom = 334.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -148,15 +159,15 @@ __meta__ = {
 }
 
 [node name="ButtonAdvanced" type="Button" parent="VBox"]
-margin_top = 314.0
+margin_top = 338.0
 margin_right = 334.0
-margin_bottom = 349.0
+margin_bottom = 373.0
 text = "Advanced options..."
 
 [node name="VBoxAdvanced" type="VBoxContainer" parent="VBox"]
-margin_top = 353.0
+margin_top = 377.0
 margin_right = 334.0
-margin_bottom = 392.0
+margin_bottom = 416.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox/VBoxAdvanced"]
 margin_right = 334.0

@@ -1,16 +1,29 @@
+class_name Cli_Network_Manager
 extends Node
+
+signal connected_to_server
+signal disconnected_from_server
+signal players_list_updated
+
+################################### Settings
+var cliLatencyUpdateFrequency = 0.5 #in seconds
+###################################
 
 var networkENet : NetworkedMultiplayerENet
 var nickname : String
+var cliLatencyTimer : Timer
+
+var cliLastLatency 		: int
+var cliNetLastLatency 	: int
+
+var players_list = {}
 
 func _ready():
 	gb.cli_network_manager = self
 
 func _process(delta):
-#	if is_instance_valid(get_tree().network_peer):
-#		get_tree().network_peer.poll()
-	pass
-		
+	get_tree().multiplayer.poll()
+
 
 #######
 ####### Functions
@@ -41,6 +54,13 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 			else:
 				local_network.close_connection(0)
 
+	cliLatencyTimer = Timer.new()
+	cliLatencyTimer.wait_time = cliLatencyUpdateFrequency
+	cliLatencyTimer.connect("timeout", self, "_on_latencyTimer_timeout")
+	self.add_child(cliLatencyTimer)
+	cliLatencyTimer.start()
+
+
 func DisconnectFromServer():
 	cw.print("Close Network client connection")
 	networkENet = null
@@ -52,21 +72,49 @@ func _Connection_Failed():
 	DisconnectFromServer()
 
 func _Connection_Succeeded():
-	#myPeerID = str(get_tree().get_network_unique_id())
 	cw.print("Client establish connection to server")
+	emit_signal("connected_to_server")
 
 func _Server_Disconnected():
 	cw.print("Client disconnected from server")
 	DisconnectFromServer()
-	#get_tree().change_scene("res://Menu.tscn")
+	emit_signal("disconnected_from_server")
+
+func _on_latencyTimer_timeout():
+	rpc_unreliable ("S_EMT_ping", OS.get_ticks_msec()) #call on all connected peer
+	get_tree().multiplayer.poll()
 
 #######
 ####### RPC Functions
 #######
 
+func set_ready(ready):
+	rpc_id(1, "S_RCV_player_ready_status", ready)
+
 puppet func C_EMT_connected_player_info ():
 	rpc_id(1, "S_RCV_connected_player_info", { "player_name" : nickname})
 
 puppet func C_EMT_ping (server_initial_tick):
-	cw.prints(["cli emmit", get_tree().get_frame()])
 	rpc_unreliable_id (1, "S_RCV_ping", server_initial_tick, OS.get_ticks_msec())
+	get_tree().multiplayer.poll()
+
+
+puppet func C_RCV_ping (client_initial_tick):
+	var final_tick = OS.get_ticks_msec()
+	
+	var latency
+	latency  = final_tick - client_initial_tick
+	latency /= 2.0 #we divide by 2 to have the "one way latency" 
+	latency = int(round(latency))
+	cliLastLatency = clamp(latency, 0, INF)
+	
+	var net_latency
+	net_latency = latency - ((1.0 / Engine.get_frames_per_second())*1000)  #As godot process received rpc 1 time per process tick, we have for sure lost a frame tick
+	net_latency = int(round(net_latency))
+	cliNetLastLatency = clamp (net_latency, 0, INF)
+	
+#	cw.prints(["C_RCV_ping",cliLastLatency, cliNetLastLatency]  )
+
+puppet func C_RCV_players_list (received_players_list):
+	players_list = received_players_list
+	emit_signal("players_list_updated")
