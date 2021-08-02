@@ -5,6 +5,7 @@ extends Node
 var maxPlayer = 12
 var upnp_enable = true
 var latencyUpdateFrequency = 0.5  #in seconds
+var compressionMode = NetworkedMultiplayerENet.COMPRESS_FASTLZ
 ###################################
 
 var networkENet : NetworkedMultiplayerENet
@@ -32,6 +33,7 @@ const player_template = {
 	"latency_last" : 0,
 	"net_latency_last" : 0,
 	"ready" : false,
+	"level_loaded" : false,
 }
 
 func init_var():
@@ -48,7 +50,8 @@ func _ready():
 	gb.srv_network_manager = self
 
 func _process(delta):
-	get_tree().multiplayer.poll()
+#	get_tree().multiplayer.poll()
+	pass
 
 #######
 ####### Functions
@@ -57,17 +60,22 @@ func _process(delta):
 func start_network_server (local := true, port := 12121):
 	
 	init_var()	
-	var err
-	err = networkENet.create_server(port,maxPlayer)
 	
+	networkENet.server_relay = false # doesn't allow client to know each other and moake p2p connection
+	networkENet.compression_mode = compressionMode
+	if local:
+		networkENet.set_bind_ip("127.0.0.1")
+	var err
+	networkENet.connect("peer_connected", self, "_Peer_Connected")
+	networkENet.connect("peer_disconnected", self, "_Peer_Disconnected")
+	
+	err = networkENet.create_server(port,maxPlayer)
 	if err != OK :
 		cw.print("[SRV] Server creation ERROR (CODE : "+str (err)+")")
 		return
 
 	get_tree().network_peer = networkENet
-	get_tree().multiplayer_poll = false
-	networkENet.connect("peer_connected", self, "_Peer_Connected")
-	networkENet.connect("peer_disconnected", self, "_Peer_Disconnected")
+#	get_tree().multiplayer_poll = false
 	
 	if not local and upnp_enable:
 		upnpDiscoverResult = upnp.discover(3000, 2, "InternetGatewayDevice")
@@ -98,6 +106,7 @@ func start_network_server (local := true, port := 12121):
 	latencyTimer.start()
 	cw.print("[SRV] Network server opened")
 	server_running = true
+	utils.change_scene(get_tree(),load("res://_srv/srv_online_scene.tscn"))
 	
 	
 
@@ -113,6 +122,7 @@ func StopServer():
 			else : 
 				cw.print("[SRV] Error while trying to deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
 	cw.print("[SRV]Server stopped")
+	utils.change_scene(get_tree(),load("res://_srv/srv_offline_scene.tscn"))
 
 
 func _Peer_Connected (peerId):
@@ -137,8 +147,21 @@ func _Peer_Disconnected (peerId):
 func _on_latencyTimer_timeout():
 #	cw.prints(["srv ask", get_tree().get_frame()])
 	rpc_unreliable ("C_EMT_ping", OS.get_ticks_msec()) #call on all connected peer
-	get_tree().multiplayer.poll()
+#	get_tree().multiplayer.poll()
 	players_infos_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
+
+func srv_change_level (level):
+	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["srv"]))
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
+
+func srv_process_level():
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(true)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(true)
+
+func reset_all_players_level_loaded():
+	for p in players_list:
+		 players_list[p]["level_loaded"] = false
 
 
 #######
@@ -149,6 +172,34 @@ func players_infos_updated():
 	#########################
 	######################### Should clean the players_list before sending it to peers
 	rpc ("C_RCV_players_infos", players_infos)
+
+remote func S_RCV_ask_launching_game():
+	var peerId = get_tree().get_rpc_sender_id()
+	if peerId == players_infos["game_owner_peerid"]:
+		reset_all_players_level_loaded()
+		var all_ready = true
+		for p in players_list:
+			if players_list[p]["ready"]!=true:
+				all_ready = false
+				break
+		if all_ready:
+			networkENet.refuse_new_connections = true
+			players_list[peerId]["level_loaded"]
+			rpc ("C_RCV_change_level" , "level1")
+			srv_change_level ("level1")
+
+remote func S_RCV_level_loaded(level):
+	var peerId = get_tree().get_rpc_sender_id()
+	if players_list.has(peerId):
+		players_list[peerId]["level_loaded"] = true
+	var all_loaded = true
+	for p in players_list:
+		if  players_list[p]["level_loaded"]!=true:
+			all_loaded = false
+			break
+	srv_process_level()
+	rpc("C_RCV_process_level")
+
 
 remote func S_RCV_connected_player_info (player_infos):
 	var peerId = get_tree().get_rpc_sender_id()
@@ -172,6 +223,8 @@ remote func S_RCV_ping (server_initial_tick, client_tick):
 	var peerId = get_tree().get_rpc_sender_id()
 	var final_tick = OS.get_ticks_msec()
 #	cw.prints(["srv receive", get_tree().get_frame(), server_initial_tick, client_tick, final_tick])
+#	cw.prints(["S_RCV_ping",server_initial_tick, final_tick]  )
+
 	if players_list.has(peerId):
 		var latency
 		latency  = final_tick - server_initial_tick
@@ -188,5 +241,4 @@ remote func S_RCV_ping (server_initial_tick, client_tick):
 remote func S_EMT_ping (client_initial_tick):
 	var peerId = get_tree().get_rpc_sender_id()
 	rpc_unreliable_id (peerId, "C_RCV_ping", client_initial_tick)
-	get_tree().multiplayer.poll()
-#	cw.print("S_EMT_ping")
+#	get_tree().multiplayer.poll()

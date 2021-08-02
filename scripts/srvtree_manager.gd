@@ -53,14 +53,29 @@ func _input(event):
 		if Input.is_action_just_pressed("k_f12"):
 			srv_tree_visible = !srv_tree_visible
 			if srv_tree_visible:
+				var cli_tree_viewport = cli_tree.root
+#				var svg_size = cli_tree_viewport.size 
+				cli_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+#				cli_tree_viewport.size = Vector2(0,0)
 				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-				disabled_input_on_all_cli_Node2D()
+#				srv_tree_viewport.size = svg_size
+				disabled_input_on_all_cli_Node2D(srv_tree)
+				restore_input_on_all_cli_Node2D(cli_tree)
 			else:
+				var cli_tree_viewport = cli_tree.root
+#				var svg_size = srv_tree_viewport.size 
+				cli_tree_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+#				cli_tree_viewport.size = svg_size
 				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
-				restore_input_on_all_cli_Node2D()
+#				srv_tree_viewport.size = Vector2(0,0)
+				disabled_input_on_all_cli_Node2D(cli_tree)
+				restore_input_on_all_cli_Node2D(srv_tree)
 		
 		if srv_tree_visible :
 			srv_tree.input_event(event)
+			cli_tree.set_input_as_handled()
+
+			
 
 #######
 ####### Events
@@ -71,15 +86,15 @@ func _on_screen_resized():
 #######
 ####### Functions
 #######
-func disabled_input_on_all_cli_Node2D():
-	for n in cli_tree.root.get_children():
+func disabled_input_on_all_cli_Node2D(tree : SceneTree):
+	for n in tree.root.get_children():
 		if (n is Node) and n.name!="srvtree_manager":
 			var n1 : Node = n #for autocompletion
 			n1.set_meta("set_process_input_SVG", n1.is_processing_input())
 			n1.set_process_input(false)
 
-func restore_input_on_all_cli_Node2D():
-	for n in cli_tree.root.get_children():
+func restore_input_on_all_cli_Node2D(tree : SceneTree):
+	for n in tree.root.get_children():
 		if (n is Node) and n.name!="srvtree_manager":
 			var n1 : Node = n #for autocompletion
 			if n1.has_meta("set_process_input_SVG"):

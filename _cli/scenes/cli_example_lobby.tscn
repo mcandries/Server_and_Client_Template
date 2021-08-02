@@ -17,20 +17,20 @@ __meta__ = {
 }
 
 [node name="VBox" type="VBoxContainer" parent="Center"]
-margin_left = 594.0
+margin_left = 585.0
 margin_top = 308.0
-margin_right = 1326.0
+margin_right = 1335.0
 margin_bottom = 772.0
 
 [node name="LabelServerName" type="Label" parent="Center/VBox"]
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 29.0
 text = "Server X.X.X.X"
 align = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="Center/VBox"]
 margin_top = 33.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 53.0
 rect_min_size = Vector2( 0, 20 )
 __meta__ = {
@@ -39,15 +39,15 @@ __meta__ = {
 
 [node name="HBox" type="HBoxContainer" parent="Center/VBox"]
 margin_top = 57.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 464.0
 
 [node name="VBox" type="VBoxContainer" parent="Center/VBox/HBox"]
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 407.0
 
 [node name="HBox" type="HBoxContainer" parent="Center/VBox/HBox/VBox"]
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 233.0
 
 [node name="VBox4" type="VBoxContainer" parent="Center/VBox/HBox/VBox/HBox"]
@@ -97,13 +97,13 @@ auto_height = true
 
 [node name="VBox2" type="VBoxContainer" parent="Center/VBox/HBox/VBox/HBox"]
 margin_left = 398.0
-margin_right = 478.0
+margin_right = 496.0
 margin_bottom = 233.0
 
 [node name="Label" type="Label" parent="Center/VBox/HBox/VBox/HBox/VBox2"]
-margin_right = 80.0
+margin_right = 98.0
 margin_bottom = 29.0
-text = "Ping"
+text = "Latency"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -111,15 +111,15 @@ __meta__ = {
 
 [node name="ItemListPing" type="ItemList" parent="Center/VBox/HBox/VBox/HBox/VBox2"]
 margin_top = 33.0
-margin_right = 80.0
+margin_right = 98.0
 margin_bottom = 233.0
 rect_min_size = Vector2( 80, 200 )
 size_flags_vertical = 3
 auto_height = true
 
 [node name="VBox3" type="VBoxContainer" parent="Center/VBox/HBox/VBox/HBox"]
-margin_left = 482.0
-margin_right = 562.0
+margin_left = 500.0
+margin_right = 580.0
 margin_bottom = 233.0
 
 [node name="Label" type="Label" parent="Center/VBox/HBox/VBox/HBox/VBox3"]
@@ -140,22 +140,22 @@ size_flags_vertical = 3
 auto_height = true
 
 [node name="ButtonKick" type="Button" parent="Center/VBox/HBox/VBox/HBox"]
-margin_left = 566.0
+margin_left = 584.0
 margin_top = 99.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 134.0
 size_flags_vertical = 4
 text = "Kick Player"
 
 [node name="MarginContainer" type="MarginContainer" parent="Center/VBox/HBox/VBox"]
 margin_top = 237.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 252.0
 rect_min_size = Vector2( 0, 15 )
 
 [node name="ButtonLeave" type="Button" parent="Center/VBox/HBox/VBox"]
 margin_top = 256.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 291.0
 text = "Leave"
 __meta__ = {
@@ -164,14 +164,14 @@ __meta__ = {
 
 [node name="MarginContainer2" type="MarginContainer" parent="Center/VBox/HBox/VBox"]
 margin_top = 295.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 310.0
 rect_min_size = Vector2( 0, 15 )
 
 [node name="ButtonReady" type="Button" parent="Center/VBox/HBox/VBox"]
 modulate = Color( 1, 0.952941, 0.729412, 1 )
 margin_top = 314.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 349.0
 text = "READY !"
 __meta__ = {
@@ -180,14 +180,14 @@ __meta__ = {
 
 [node name="MarginContainer3" type="MarginContainer" parent="Center/VBox/HBox/VBox"]
 margin_top = 353.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 368.0
 rect_min_size = Vector2( 0, 15 )
 
 [node name="ButtonLaunch" type="Button" parent="Center/VBox/HBox/VBox"]
 modulate = Color( 1, 0.952941, 0.729412, 1 )
 margin_top = 372.0
-margin_right = 732.0
+margin_right = 750.0
 margin_bottom = 407.0
 text = "LAUNCH !"
 __meta__ = {
@@ -197,3 +197,4 @@ __meta__ = {
 [connection signal="pressed" from="Center/VBox/HBox/VBox/HBox/ButtonKick" to="." method="_on_ButtonKick_pressed"]
 [connection signal="pressed" from="Center/VBox/HBox/VBox/ButtonLeave" to="." method="_on_ButtonLeave_pressed"]
 [connection signal="pressed" from="Center/VBox/HBox/VBox/ButtonReady" to="." method="_on_ButtonReady_pressed"]
+[connection signal="pressed" from="Center/VBox/HBox/VBox/ButtonLaunch" to="." method="_on_ButtonLaunch_pressed"]

@@ -102,3 +102,7 @@ func _on_ButtonReady_pressed():
 func _on_ButtonKick_pressed():
 	gb.cli_network_manager.kick_player (ArrayListPeerId[itemListPlayers.get_selected_items()[0]])
 	
+
+
+func _on_ButtonLaunch_pressed():
+	gb.cli_network_manager.launch_game()

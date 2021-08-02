@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://_srv/srv_super_gui.gd" type="Script" id=1]
+
+[node name="SrvSuperGui" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 1.18921
+margin_right = 1.18921
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="."]
+margin_left = 1842.08
+margin_top = 49.9467
+margin_right = 1919.08
+margin_bottom = 69.9467
+text = "See Lobby"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]

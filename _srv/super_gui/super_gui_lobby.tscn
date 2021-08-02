@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://_srv/super_gui/super_gui_lobby.gd" type="Script" id=1]
+
+[node name="SuperGuiLobby" type="CenterContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 1920, 1080 )
+mouse_filter = 2
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ItemListPlayers" type="ItemList" parent="."]
+margin_left = 860.0
+margin_top = 390.0
+margin_right = 1060.0
+margin_bottom = 690.0
+rect_min_size = Vector2( 200, 300 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_height = true
