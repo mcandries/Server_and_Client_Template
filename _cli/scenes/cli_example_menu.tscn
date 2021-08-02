@@ -18,9 +18,9 @@ __meta__ = {
 
 [node name="VBox" type="VBoxContainer" parent="."]
 margin_left = 793.0
-margin_top = 332.0
+margin_top = 300.0
 margin_right = 1127.0
-margin_bottom = 748.0
+margin_bottom = 779.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
@@ -167,7 +167,7 @@ text = "Advanced options..."
 [node name="VBoxAdvanced" type="VBoxContainer" parent="VBox"]
 margin_top = 377.0
 margin_right = 334.0
-margin_bottom = 416.0
+margin_bottom = 479.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox/VBoxAdvanced"]
 margin_right = 334.0
@@ -195,6 +195,23 @@ text = "12121"
 caret_blink = true
 caret_blink_speed = 0.5
 
+[node name="MarginContainer5" type="MarginContainer" parent="VBox/VBoxAdvanced"]
+margin_top = 43.0
+margin_right = 334.0
+margin_bottom = 63.0
+rect_min_size = Vector2( 0, 20 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonCreateServer" type="Button" parent="VBox/VBoxAdvanced"]
+margin_top = 67.0
+margin_right = 334.0
+margin_bottom = 102.0
+text = "Create Server Only"
+
 [connection signal="pressed" from="VBox/ButtonSolo" to="." method="_on_ButtonSolo_pressed"]
 [connection signal="pressed" from="VBox/ButtonCreateGame" to="." method="_on_ButtonCreateGame_pressed"]
 [connection signal="pressed" from="VBox/ButtonJoinGame" to="." method="_on_ButtonJoinGame_pressed"]
@@ -202,3 +219,4 @@ caret_blink_speed = 0.5
 [connection signal="pressed" from="VBox/VBoxJoinGameOption/HBox2/ButtonJoin" to="." method="_on_ButtonJoin_pressed"]
 [connection signal="pressed" from="VBox/ButtonAdvanced" to="." method="_on_ButtonAdvanced_pressed"]
 [connection signal="text_changed" from="VBox/VBoxAdvanced/HBox/Port" to="." method="_on_Port_text_changed"]
+[connection signal="pressed" from="VBox/VBoxAdvanced/ButtonCreateServer" to="." method="_on_ButtonCreateServer_pressed"]

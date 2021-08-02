@@ -7,10 +7,10 @@ var upnp_enable = true
 var latencyUpdateFrequency = 0.5  #in seconds
 ###################################
 
-var networkENet = NetworkedMultiplayerENet.new()
+var networkENet : NetworkedMultiplayerENet
 var server_running = false 
 
-var upnp = UPNP.new()
+var upnp :UPNP
 var upnpOpenedPort
 var upnpDiscoverResult
 var upnpExternalIP
@@ -19,16 +19,30 @@ var upnpFirstDevice
 var upnpPortResult
 var upnpPortDeleteResult
 
+var server_public_ip = ""
+
 var latencyTimer : Timer
 
 var players_list = {}
 
-const players_list_template = {
+var players_infos = {}
+
+const player_template = {
 	"player_name" : "",
 	"latency_last" : 0,
 	"net_latency_last" : 0,
-	"ready" : false,	
+	"ready" : false,
 }
+
+func init_var():
+	networkENet = NetworkedMultiplayerENet.new()
+	upnp = UPNP.new()
+	players_list = {}
+	players_infos = {
+		"players_list" : players_list,
+		"game_owner_peerid" : 1
+	}
+	server_public_ip = ""
 
 func _ready():
 	gb.srv_network_manager = self
@@ -41,7 +55,8 @@ func _process(delta):
 #######
 
 func start_network_server (local := true, port := 12121):
-		
+	
+	init_var()	
 	var err
 	err = networkENet.create_server(port,maxPlayer)
 	
@@ -67,6 +82,7 @@ func start_network_server (local := true, port := 12121):
 				upnpFirstDevice =  upnp.get_device(0)
 				cw.print("[SRV] First UPNP device is " + upnpFirstDevice.description_url)
 				upnpExternalIP = upnpFirstDevice.query_external_address()
+				server_public_ip = upnpExternalIP
 				cw.print("[SRV] First UPNP external IP is " + upnpExternalIP)
 				upnpPortResult = upnp.add_port_mapping(port)
 				if upnpPortResult == upnp.UPNP_RESULT_SUCCESS:
@@ -100,42 +116,57 @@ func StopServer():
 
 
 func _Peer_Connected (peerId):
-	players_list[peerId] = players_list_template.duplicate(true)
+	players_list[peerId] = player_template.duplicate(true)
+	if players_list.size()==1: 	# First player to join is the game_owner
+		players_infos["game_owner_peerid"] = peerId
 	rpc_id(peerId, "C_EMT_connected_player_info")
 	cw.print("[SRV] New player connected ("+str(peerId) +")")
 
 func _Peer_Disconnected (peerId):
-	players_list.erase(peerId)
-	players_list_updated()
+	if peerId == players_infos["game_owner_peerid"]: # if GameOwner Leave, someone else besome game_owner
+		if players_list.size()>1:
+			for p in players_list:
+				if p != peerId:
+					players_infos["game_owner_peerid"] = p
+					break
+						
+	players_list.erase(peerId) 
+	players_infos_updated()
 	cw.print("[SRV] Player disconnected ("+str(peerId) +")")
 
 func _on_latencyTimer_timeout():
 #	cw.prints(["srv ask", get_tree().get_frame()])
 	rpc_unreliable ("C_EMT_ping", OS.get_ticks_msec()) #call on all connected peer
 	get_tree().multiplayer.poll()
-	players_list_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
+	players_infos_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
 
 
 #######
 ####### RPC Functions
 #######
 
-func players_list_updated():
+func players_infos_updated():
 	#########################
 	######################### Should clean the players_list before sending it to peers
-	rpc ("C_RCV_players_list", players_list)
+	rpc ("C_RCV_players_infos", players_infos)
 
 remote func S_RCV_connected_player_info (player_infos):
 	var peerId = get_tree().get_rpc_sender_id()
 	players_list[peerId]["player_name"] = player_infos.player_name
-	players_list_updated()
+	players_infos_updated()
 	cw.prints (["[SRV] Player connected", peerId, "is", players_list[peerId].player_name])
 
 
 remote func S_RCV_player_ready_status (ready):
 	var peerId = get_tree().get_rpc_sender_id()
 	players_list[peerId]["ready"] = ready	
-	players_list_updated()
+	players_infos_updated()
+
+remote func S_RCV_kick_player (peerID_to_kick : int):
+	var peerId = get_tree().get_rpc_sender_id()
+	if peerId == players_infos["game_owner_peerid"]:
+		if peerID_to_kick != players_infos["game_owner_peerid"]:
+			networkENet.disconnect_peer(peerID_to_kick)
 
 remote func S_RCV_ping (server_initial_tick, client_tick):
 	var peerId = get_tree().get_rpc_sender_id()

@@ -3,7 +3,7 @@ extends Node
 
 signal connected_to_server
 signal disconnected_from_server
-signal players_list_updated
+signal players_infos_updated
 
 ################################### Settings
 var cliLatencyUpdateFrequency = 0.5 #in seconds
@@ -16,7 +16,18 @@ var cliLatencyTimer : Timer
 var cliLastLatency 		: int
 var cliNetLastLatency 	: int
 
+var server_ip   : String
+
+var players_infos = {}
 var players_list = {}
+var is_game_owner = false
+
+func init_var():
+	networkENet = NetworkedMultiplayerENet.new()
+	players_list = {}
+	players_infos = {}
+	is_game_owner = false
+	server_ip = ""
 
 func _ready():
 	gb.cli_network_manager = self
@@ -30,9 +41,11 @@ func _process(delta):
 #######
 
 func start_network_client (ip :="127.0.0.1", port := 12121, playername := "player_unkown"):
+
+	init_var()
 	var err 
+	players_list = {}
 	nickname = playername
-	networkENet = NetworkedMultiplayerENet.new()
 	cw.print("Connection to " + str(ip) + ":" + str(port) + " ...")
 	err = networkENet.create_client(ip,port)
 	if err != OK :
@@ -44,6 +57,14 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 		networkENet.connect("connection_failed", self, "_Connection_Failed")
 		networkENet.connect("connection_succeeded", self, "_Connection_Succeeded")
 		networkENet.connect("server_disconnected", self, "_Server_Disconnected")
+		
+		server_ip = ip
+		cliLatencyTimer = Timer.new()
+		cliLatencyTimer.wait_time = cliLatencyUpdateFrequency
+		cliLatencyTimer.connect("timeout", self, "_on_latencyTimer_timeout")
+		self.add_child(cliLatencyTimer)
+		cliLatencyTimer.start()
+		
 		var local_network = networkENet
 		yield (get_tree().create_timer(3),"timeout")
 		if is_instance_valid(local_network): #In case we shoot the networkENet connection during the 3 seconds
@@ -53,12 +74,6 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 					DisconnectFromServer()
 			else:
 				local_network.close_connection(0)
-
-	cliLatencyTimer = Timer.new()
-	cliLatencyTimer.wait_time = cliLatencyUpdateFrequency
-	cliLatencyTimer.connect("timeout", self, "_on_latencyTimer_timeout")
-	self.add_child(cliLatencyTimer)
-	cliLatencyTimer.start()
 
 
 func DisconnectFromServer():
@@ -88,6 +103,10 @@ func _on_latencyTimer_timeout():
 ####### RPC Functions
 #######
 
+func kick_player (peerID_to_kick : int):
+	if is_game_owner :
+		rpc_id(1, "S_RCV_kick_player", peerID_to_kick)
+
 func set_ready(ready):
 	rpc_id(1, "S_RCV_player_ready_status", ready)
 
@@ -115,6 +134,8 @@ puppet func C_RCV_ping (client_initial_tick):
 	
 #	cw.prints(["C_RCV_ping",cliLastLatency, cliNetLastLatency]  )
 
-puppet func C_RCV_players_list (received_players_list):
-	players_list = received_players_list
-	emit_signal("players_list_updated")
+puppet func C_RCV_players_infos (received_players_infos):
+	players_infos = received_players_infos
+	players_list = players_infos["players_list"]
+	is_game_owner = ( players_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
+	emit_signal("players_infos_updated")

@@ -17,8 +17,12 @@ func _on_ButtonSolo_pressed():
 func _on_ButtonCreateGame_pressed():
 	#Start server and try to open port to Internet
 	gb.srv_network_manager.start_network_server(false, int($VBox/VBoxAdvanced/HBox/Port.text))
-	#Start client on localhost:
-	gb.cli_network_manager.start_network_client ("127.0.0.1", int($VBox/VBoxAdvanced/HBox/Port.text), $VBox/HBoxNickName/NickName.text)
+	#Start client on server public IP:
+	if gb.srv_network_manager.server_public_ip==null or gb.srv_network_manager.server_public_ip=="":
+		cw.prints (["error, cant't get the public IP and create the server..."])
+		gb.srv_network_manager.StopServer()
+	else : 
+		gb.cli_network_manager.start_network_client (gb.srv_network_manager.server_public_ip, int($VBox/VBoxAdvanced/HBox/Port.text), $VBox/HBoxNickName/NickName.text)
 
 func _on_ButtonJoinGame_pressed():
 	$VBox/VBoxJoinGameOption.visible = !$VBox/VBoxJoinGameOption.visible
@@ -37,6 +41,8 @@ func _on_Port_text_changed(new_text :String):
 	if (new_text.length()>0) and int(new_text)==0:
 		$VBox/VBoxAdvanced/HBox/Port.text = "12121"
 
+func _on_ButtonCreateServer_pressed():
+	gb.srv_network_manager.start_network_server(false, int($VBox/VBoxAdvanced/HBox/Port.text))
 
 
 func _on_connected_to_server():
@@ -44,5 +50,6 @@ func _on_connected_to_server():
 
 func _on_disconnected_from_server():
 	pass
+
 
 
