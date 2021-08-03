@@ -18,3 +18,7 @@ script = ExtResource( 3 )
 [node name="SrvDefaultBackground" parent="ActiveScene" instance=ExtResource( 2 )]
 
 [node name="SrvSuperGui" parent="." instance=ExtResource( 4 )]
+
+[node name="RootCamera2D" type="Camera2D" parent="."]
+position = Vector2( 1919, 1079 )
+current = true

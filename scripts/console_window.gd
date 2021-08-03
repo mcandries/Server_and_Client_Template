@@ -18,7 +18,7 @@ func _ready():
 		if (n is Node2D) :
 			console_window = Pconsole_Window.instance()
 			n.add_child(console_window)
-			console_window.rect_position = Vector2 (10, n.get_viewport().get_visible_rect().size.y - console_window.rect_size.y - 10 )
+			console_window.rect_position = Vector2 (10, gb.project_design_height - console_window.rect_min_size.y - 10 )
 			console_window.visible = console_initial_visibility
 			console_label 	= console_window.get_node("consoleLabel")
 			console_vscroll 	= console_window.get_node("consoleScrollBar")

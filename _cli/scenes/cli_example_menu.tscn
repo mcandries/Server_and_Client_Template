@@ -1,12 +1,14 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://ressources/themes/game_gui_theme.tres" type="Theme" id=1]
 [ext_resource path="res://_cli/scenes/cli_example_menu.gd" type="Script" id=2]
+[ext_resource path="res://_cli/arts/carlsberg-4k.jpg" type="Texture" id=3]
+[ext_resource path="res://icon.png" type="Texture" id=4]
 
 [node name="Menu" type="CenterContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_min_size = Vector2( 1920, 1080 )
+rect_min_size = Vector2( 3840, 2160 )
 size_flags_horizontal = 7
 size_flags_vertical = 7
 theme = ExtResource( 1 )
@@ -16,11 +18,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="carlsberg-4k" type="Sprite" parent="."]
+position = Vector2( 1921.31, 1079.4 )
+texture = ExtResource( 3 )
+
 [node name="VBox" type="VBoxContainer" parent="."]
-margin_left = 793.0
-margin_top = 300.0
-margin_right = 1127.0
-margin_bottom = 779.0
+margin_left = 1520.0
+margin_top = 580.0
+margin_right = 2320.0
+margin_bottom = 1580.0
+rect_min_size = Vector2( 600, 1000 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 alignment = 1
@@ -29,19 +36,23 @@ __meta__ = {
 }
 
 [node name="HBoxNickName" type="HBoxContainer" parent="VBox"]
-margin_right = 334.0
-margin_bottom = 39.0
+margin_top = 78.0
+margin_right = 800.0
+margin_bottom = 142.0
+size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="VBox/HBoxNickName"]
 margin_top = 5.0
-margin_right = 140.0
-margin_bottom = 34.0
+margin_right = 398.0
+margin_bottom = 59.0
+size_flags_horizontal = 3
+size_flags_vertical = 6
 text = "Nickname :"
 
 [node name="NickName" type="LineEdit" parent="VBox/HBoxNickName"]
-margin_left = 144.0
-margin_right = 334.0
-margin_bottom = 39.0
+margin_left = 402.0
+margin_right = 800.0
+margin_bottom = 64.0
 size_flags_horizontal = 3
 text = "player_one"
 __meta__ = {
@@ -49,146 +60,145 @@ __meta__ = {
 }
 
 [node name="MarginContainer4" type="MarginContainer" parent="VBox"]
-margin_top = 43.0
-margin_right = 334.0
-margin_bottom = 63.0
-rect_min_size = Vector2( 0, 20 )
-size_flags_horizontal = 3
-size_flags_vertical = 3
+margin_top = 146.0
+margin_right = 800.0
+margin_bottom = 186.0
+rect_min_size = Vector2( 0, 40 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSolo" type="Button" parent="VBox"]
-margin_top = 67.0
-margin_right = 334.0
-margin_bottom = 102.0
+margin_top = 190.0
+margin_right = 800.0
+margin_bottom = 270.0
+rect_min_size = Vector2( 800, 80 )
 text = "Play Solo"
 
 [node name="MarginContainer" type="MarginContainer" parent="VBox"]
-margin_top = 106.0
-margin_right = 334.0
-margin_bottom = 126.0
-rect_min_size = Vector2( 0, 20 )
+margin_top = 274.0
+margin_right = 800.0
+margin_bottom = 314.0
+rect_min_size = Vector2( 0, 40 )
 size_flags_horizontal = 3
-size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonCreateGame" type="Button" parent="VBox"]
-margin_top = 130.0
-margin_right = 334.0
-margin_bottom = 165.0
+margin_top = 318.0
+margin_right = 800.0
+margin_bottom = 398.0
+rect_min_size = Vector2( 800, 80 )
 text = "Create Multiplayer Game"
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBox"]
-margin_top = 169.0
-margin_right = 334.0
-margin_bottom = 189.0
+margin_top = 402.0
+margin_right = 800.0
+margin_bottom = 422.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
-size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonJoinGame" type="Button" parent="VBox"]
-margin_top = 193.0
-margin_right = 334.0
-margin_bottom = 228.0
+margin_top = 426.0
+margin_right = 800.0
+margin_bottom = 506.0
+rect_min_size = Vector2( 800, 80 )
 text = "Join Multiplayer Game"
 
 [node name="VBoxJoinGameOption" type="VBoxContainer" parent="VBox"]
-margin_top = 232.0
-margin_right = 334.0
-margin_bottom = 310.0
+margin_top = 510.0
+margin_right = 800.0
+margin_bottom = 638.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox/VBoxJoinGameOption"]
-margin_right = 334.0
-margin_bottom = 39.0
+margin_right = 800.0
+margin_bottom = 64.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="VBox/VBoxJoinGameOption/HBox"]
 margin_top = 5.0
-margin_right = 56.0
-margin_bottom = 34.0
+margin_right = 112.0
+margin_bottom = 59.0
 text = "IP :"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Ip" type="LineEdit" parent="VBox/VBoxJoinGameOption/HBox"]
-margin_left = 60.0
-margin_right = 334.0
-margin_bottom = 39.0
+margin_left = 116.0
+margin_right = 800.0
+margin_bottom = 64.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 caret_blink = true
 caret_blink_speed = 0.5
 
 [node name="HBox2" type="HBoxContainer" parent="VBox/VBoxJoinGameOption"]
-margin_top = 43.0
-margin_right = 334.0
-margin_bottom = 78.0
+margin_top = 68.0
+margin_right = 800.0
+margin_bottom = 128.0
 
 [node name="MarginContainer" type="MarginContainer" parent="VBox/VBoxJoinGameOption/HBox2"]
-margin_right = 262.0
-margin_bottom = 35.0
+margin_right = 672.0
+margin_bottom = 60.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="ButtonJoin" type="Button" parent="VBox/VBoxJoinGameOption/HBox2"]
-margin_left = 266.0
-margin_right = 334.0
-margin_bottom = 35.0
+margin_left = 676.0
+margin_right = 800.0
+margin_bottom = 60.0
 disabled = true
 text = "Join"
 
 [node name="MarginContainer3" type="MarginContainer" parent="VBox"]
-margin_top = 314.0
-margin_right = 334.0
-margin_bottom = 334.0
+margin_top = 642.0
+margin_right = 800.0
+margin_bottom = 662.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
-size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonAdvanced" type="Button" parent="VBox"]
-margin_top = 338.0
-margin_right = 334.0
-margin_bottom = 373.0
+margin_top = 666.0
+margin_right = 800.0
+margin_bottom = 746.0
+rect_min_size = Vector2( 800, 80 )
 text = "Advanced options..."
 
 [node name="VBoxAdvanced" type="VBoxContainer" parent="VBox"]
-margin_top = 377.0
-margin_right = 334.0
-margin_bottom = 479.0
+margin_top = 750.0
+margin_right = 800.0
+margin_bottom = 922.0
 
 [node name="HBox" type="HBoxContainer" parent="VBox/VBoxAdvanced"]
-margin_right = 334.0
-margin_bottom = 39.0
+margin_right = 800.0
+margin_bottom = 64.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="VBox/VBoxAdvanced/HBox"]
 margin_top = 5.0
-margin_right = 84.0
-margin_bottom = 34.0
+margin_right = 168.0
+margin_bottom = 59.0
 text = "Port :"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Port" type="LineEdit" parent="VBox/VBoxAdvanced/HBox"]
-margin_left = 88.0
-margin_right = 334.0
-margin_bottom = 39.0
+margin_left = 172.0
+margin_right = 800.0
+margin_bottom = 64.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "12121"
@@ -196,9 +206,9 @@ caret_blink = true
 caret_blink_speed = 0.5
 
 [node name="MarginContainer5" type="MarginContainer" parent="VBox/VBoxAdvanced"]
-margin_top = 43.0
-margin_right = 334.0
-margin_bottom = 63.0
+margin_top = 68.0
+margin_right = 800.0
+margin_bottom = 88.0
 rect_min_size = Vector2( 0, 20 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -207,10 +217,41 @@ __meta__ = {
 }
 
 [node name="ButtonCreateServer" type="Button" parent="VBox/VBoxAdvanced"]
-margin_top = 67.0
-margin_right = 334.0
-margin_bottom = 102.0
+margin_top = 92.0
+margin_right = 800.0
+margin_bottom = 172.0
+rect_min_size = Vector2( 800, 80 )
 text = "Create Server Only"
+
+[node name="icon" type="Sprite" parent="."]
+position = Vector2( -67.3671, 238.197 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="icon2" type="Sprite" parent="."]
+position = Vector2( -72.1955, 1446.96 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="icon3" type="Sprite" parent="."]
+position = Vector2( 1597.5, 2248.66 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="icon4" type="Sprite" parent="."]
+position = Vector2( 2174.41, 2244.66 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="icon5" type="Sprite" parent="."]
+position = Vector2( 3916.47, 1847.54 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
+
+[node name="icon6" type="Sprite" parent="."]
+position = Vector2( 3910.43, 362.52 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 4 )
 
 [connection signal="pressed" from="VBox/ButtonSolo" to="." method="_on_ButtonSolo_pressed"]
 [connection signal="pressed" from="VBox/ButtonCreateGame" to="." method="_on_ButtonCreateGame_pressed"]

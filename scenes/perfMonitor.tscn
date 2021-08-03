@@ -20,50 +20,50 @@ __meta__ = {
 }
 
 [node name="LabelFPS" type="Label" parent="HBox"]
-margin_right = 36.0
-margin_bottom = 18.0
+margin_right = 72.0
+margin_bottom = 36.0
 size_flags_vertical = 0
 text = "FPS:"
 valign = 1
 
 [node name="FPS" type="Label" parent="HBox"]
-margin_left = 40.0
-margin_right = 100.0
-margin_bottom = 18.0
+margin_left = 76.0
+margin_right = 136.0
+margin_bottom = 36.0
 rect_min_size = Vector2( 60, 0 )
 size_flags_vertical = 0
 text = "-"
 valign = 1
 
 [node name="LabelPing" type="Label" parent="HBox"]
-margin_left = 104.0
-margin_right = 149.0
-margin_bottom = 18.0
+margin_left = 140.0
+margin_right = 230.0
+margin_bottom = 36.0
 size_flags_vertical = 0
 text = "Ping:"
 valign = 1
 
 [node name="Ping" type="Label" parent="HBox"]
-margin_left = 153.0
-margin_right = 213.0
-margin_bottom = 18.0
+margin_left = 234.0
+margin_right = 294.0
+margin_bottom = 36.0
 rect_min_size = Vector2( 60, 0 )
 size_flags_vertical = 0
 text = "-"
 valign = 1
 
 [node name="LabelTotalLatency" type="Label" parent="HBox"]
-margin_left = 217.0
-margin_right = 352.0
-margin_bottom = 18.0
+margin_left = 298.0
+margin_right = 568.0
+margin_bottom = 36.0
 size_flags_vertical = 0
 text = "Total Latency :"
 valign = 1
 
 [node name="TotalLatency" type="Label" parent="HBox"]
-margin_left = 356.0
-margin_right = 416.0
-margin_bottom = 18.0
+margin_left = 572.0
+margin_right = 632.0
+margin_bottom = 36.0
 rect_min_size = Vector2( 60, 0 )
 size_flags_vertical = 0
 text = "-"

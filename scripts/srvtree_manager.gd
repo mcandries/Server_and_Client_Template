@@ -7,18 +7,26 @@ var 	srv_tree_process_divider = 1  #srv_tree is process as often as cli_tree
 ###################################
 
 onready var cli_tree : SceneTree = get_tree()
+var cli_tree_viewport : Viewport
+
 var srv_tree : SceneTree = SceneTree.new()
-var srv_tree_viewport
+var srv_tree_viewport : Viewport
 var srv_tree_visible = false
 
+var first_process = true
+
 func _ready():
+	cli_tree_viewport = get_tree().root
+	get_tree().connect("screen_resized", self, "_on_screen_resized")
+	
 	if srv_tree_enable :
 		#init
 		srv_tree.init()
 		srv_tree_viewport = srv_tree.root
 
 		#set SceneTree stretching & options
-		srv_tree.set_screen_stretch(int(ProjectSettings.get_setting("display/window/stretch/mode")),int(ProjectSettings.get_setting("display/window/stretch/aspect")), Vector2(0,0),float (ProjectSettings.get_setting("display/window/stretch/shrink")))
+#		srv_tree.set_screen_stretch(int(ProjectSettings.get_setting("display/window/stretch/mode")),int(ProjectSettings.get_setting("display/window/stretch/aspect")), Vector2(0,0),float (ProjectSettings.get_setting("display/window/stretch/shrink")))
+#		srv_tree.set_screen_stretch(SceneTree.STRETCH_MODE_DISABLED,SceneTree.STRETCH_ASPECT_EXPAND, Vector2(0,0),float (ProjectSettings.get_setting("display/window/stretch/shrink")))
 
 		#active processing
 		srv_tree.root.set_process(true)
@@ -28,16 +36,25 @@ func _ready():
 		srv_tree_viewport.render_direct_to_screen = false
 		srv_tree_viewport.transparent_bg = false
 		srv_tree_viewport.render_direct_to_screen = false
-		srv_tree_viewport.size = get_tree().root.size
+#		srv_tree_viewport.size = get_tree().root.size
+#		srv_tree_viewport.size = Vector2 (ProjectSettings.get_setting("display/window/size/width"), ProjectSettings.get_setting("display/window/size/height"))
 		srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED # to hide viewport elsewise it draw on top of the main scenetree
 		
 		#caught the main tree "screen_resized" to reset the srv_tree screen_stretch
-		get_tree().connect("screen_resized", self, "_on_screen_resized")
+		
 
 		#load the srv root scene
 		srv_tree.change_scene(srv_tree_root_scene_path)
 
+	
+
 func _process(delta):
+	if first_process:
+		if ProjectSettings.get_setting("display/window/size/test_width")!=0 and ProjectSettings.get_setting("display/window/size/test_height")!=0:
+			cli_tree_viewport.size = Vector2 (ProjectSettings.get_setting("display/window/size/test_width"), ProjectSettings.get_setting("display/window/size/test_height"))
+			_on_screen_resized()
+		first_process = false
+		
 	if srv_tree_enable :
 		if (get_tree().get_frame() % srv_tree_process_divider) == 0:
 			#make server tree process alive
@@ -81,7 +98,40 @@ func _input(event):
 ####### Events
 #######
 func _on_screen_resized():
-	srv_tree_viewport.size = get_tree().root.size
+#	prints ( get_tree().root.size ) 
+	# We NEED to to the aspect ratio of the main scene by ourself (do not use project setting display/window/stretch/mode or display/window/stretch/aspect !)
+	var initial_aspect_ratio =  gb.project_design_width/float(gb.project_design_height)
+	
+	if get_tree().root.size.y>0:  #avoird div/0
+		var current_aspect_ratio = get_tree().root.size.x / get_tree().root.size.y*1.0
+		var new_x_size : float
+		var new_y_size : float
+		
+		if current_aspect_ratio>initial_aspect_ratio: #we keep the Y size, and extend the X size
+			new_y_size = get_tree().root.size.y
+			new_x_size = int (round (new_y_size * initial_aspect_ratio))
+		else: #we keep the X size, and extend the Y size
+			new_x_size = get_tree().root.size.x
+			new_y_size = int(round(new_x_size / initial_aspect_ratio))
+			
+	#	prints (initial_aspect_ratio, current_aspect_ratio, new_x_size, new_y_size, gb.project_design_width/new_x_size, gb.project_design_height/new_y_size  ) 
+		var cli_tree_viewport_camera2D = cli_tree_viewport.get_node("/root/RootScene/RootCamera2D")
+	#	cli_tree_viewport_camera2D.zoom = Vector2 (ProjectSettings.get_setting("display/window/size/width")/get_tree().root.size.x,ProjectSettings.get_setting("display/window/size/height")/get_tree().root.size.y)
+		cli_tree_viewport_camera2D.zoom = Vector2 (gb.project_design_width/new_x_size, gb.project_design_height/new_y_size)
+		
+		if srv_tree_enable : 
+	#		srv_tree_viewport.size = Vector2 (ProjectSettings.get_setting("display/window/size/width"), ProjectSettings.get_setting("display/window/size/height"))
+	#		srv_tree_viewport.size = Vector2 (1920,1080)
+			srv_tree_viewport.size = get_tree().root.size
+
+	#		srv_tree_viewport.size_override_stretch = true
+	#		srv_tree_viewport.set_size_override(true, get_tree().root.size, Vector2 (0,0))
+	#		srv_tree_viewport.size_override_stretch = true
+			var srv_tree_viewport_camera2D = srv_tree_viewport.get_node("/root/RootScene/RootCamera2D")
+			#srv_tree_viewport_camera2D.zoom = Vector2 (ProjectSettings.get_setting("display/window/size/width")/get_tree().root.size.x,ProjectSettings.get_setting("display/window/size/height")/get_tree().root.size.y)
+			srv_tree_viewport_camera2D.zoom = Vector2 (gb.project_design_width/new_x_size,gb.project_design_height/new_y_size)
+
+
 
 #######
 ####### Functions

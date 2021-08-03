@@ -6,17 +6,18 @@
 
 [node name="HBoxContainer" type="HBoxContainer"]
 modulate = Color( 1, 1, 1, 0.501961 )
-margin_right = 500.0
-margin_bottom = 250.0
+margin_right = 1200.0
+margin_bottom = 500.0
+rect_min_size = Vector2( 1200, 512 )
 script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="consoleLabel" type="Label" parent="."]
-margin_right = 550.0
-margin_bottom = 250.0
-rect_min_size = Vector2( 550, 250 )
+margin_right = 1180.0
+margin_bottom = 512.0
+rect_min_size = Vector2( 1024, 512 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/normal = ExtResource( 1 )
@@ -33,8 +34,9 @@ __meta__ = {
 }
 
 [node name="consoleScrollBar" type="VScrollBar" parent="."]
-margin_left = 554.0
-margin_right = 566.0
-margin_bottom = 250.0
+margin_left = 1184.0
+margin_right = 1200.0
+margin_bottom = 512.0
+rect_min_size = Vector2( 16, 0 )
 
 [connection signal="scrolling" from="consoleScrollBar" to="." method="_on_consoleScrollBar_scrolling"]

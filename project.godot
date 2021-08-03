@@ -14,26 +14,14 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://_cli/cli_network_manager.gd"
 }, {
-"base": "",
-"class": "GitAPI",
-"language": "NativeScript",
-"path": "res://git_api.gdns"
-}, {
 "base": "Node",
 "class": "Srv_Network_Manager",
 "language": "GDScript",
 "path": "res://_srv/srv_network_manager.gd"
-}, {
-"base": "Object",
-"class": "TypeFormattingLogic",
-"language": "GDScript",
-"path": "res://addons/metadata_inspector/TypeFormattingLogic.gd"
 } ]
 _global_script_class_icons={
 "Cli_Network_Manager": "",
-"GitAPI": "",
-"Srv_Network_Manager": "",
-"TypeFormattingLogic": ""
+"Srv_Network_Manager": ""
 }
 
 [application]
@@ -57,14 +45,14 @@ settings/stdout/verbose_stdout=true
 
 [display]
 
-window/size/width=1920
-window/size/height=1080
-window/stretch/mode="2d"
-window/stretch/aspect="expand"
+window/size/width=3840
+window/size/height=2160
+window/size/test_width=1920
+window/size/test_height=1080
 
 [gdnative]
 
-singletons=[ "res://git_api.gdnlib" ]
+singletons=[  ]
 
 [input]
 
@@ -169,6 +157,7 @@ k_f12={
 common/enable_pause_aware_picking=true
 2d/physics_engine="GodotPhysics"
 3d/physics_engine="GodotPhysics"
+2d/thread_model=2
 
 [rendering]
 

@@ -18,3 +18,8 @@ func _on_Button_pressed():
 	
 	
 	
+
+
+func _on_ButtonFS_pressed():
+	OS.window_fullscreen = !OS.window_fullscreen
+	pass # Replace with function body.

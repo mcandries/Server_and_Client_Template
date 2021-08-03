@@ -3,7 +3,7 @@
 [ext_resource path="res://_cli/ressources/fonts/ttf/DejaVu Sans Mono for Powerline.ttf" type="DynamicFontData" id=1]
 
 [resource]
-size = 24
+size = 46
 outline_size = 3
 outline_color = Color( 0, 0, 0, 1 )
 use_mipmaps = true
