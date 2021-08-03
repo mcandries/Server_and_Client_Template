@@ -8,9 +8,9 @@ var project_design_height : int = ProjectSettings.get_setting("display/window/si
 
 var levels_scenes_list = {
 	"scenes" : {
-		"level1" : {
-			"cli" : "res://_cli/scenes/cli_example_level1.tscn",
-			"srv" : "res://_srv/scenes/srv_example_level1.tscn",
+		"Level1" : {
+			"cli" : "res://_common/levels/level1.tscn",
+			"srv" : "res://_common/levels/level1.tscn"
 		}
 	}
 	

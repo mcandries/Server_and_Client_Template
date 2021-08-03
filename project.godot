@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Node2D",
+"class": "CTank",
+"language": "GDScript",
+"path": "res://_common/scenes/tank.gd"
+}, {
 "base": "Node",
 "class": "Cli_Network_Manager",
 "language": "GDScript",
@@ -20,6 +25,7 @@ _global_script_classes=[ {
 "path": "res://_srv/srv_network_manager.gd"
 } ]
 _global_script_class_icons={
+"CTank": "",
 "Cli_Network_Manager": "",
 "Srv_Network_Manager": ""
 }

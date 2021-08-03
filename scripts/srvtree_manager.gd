@@ -67,8 +67,8 @@ func _input(event):
 #				cli_tree_viewport.size = Vector2(0,0)
 				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
 #				srv_tree_viewport.size = svg_size
-				disabled_input_on_all_cli_Node2D(srv_tree)
-				restore_input_on_all_cli_Node2D(cli_tree)
+				disabled_input_on_all_cli_Node2D(cli_tree)
+				restore_input_on_all_cli_Node2D(srv_tree)
 			else:
 				var cli_tree_viewport = cli_tree.root
 #				var svg_size = srv_tree_viewport.size 
@@ -76,8 +76,8 @@ func _input(event):
 #				cli_tree_viewport.size = svg_size
 				srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 #				srv_tree_viewport.size = Vector2(0,0)
-				disabled_input_on_all_cli_Node2D(cli_tree)
-				restore_input_on_all_cli_Node2D(srv_tree)
+				disabled_input_on_all_cli_Node2D(srv_tree)
+				restore_input_on_all_cli_Node2D(cli_tree)
 		
 		if srv_tree_visible :
 			srv_tree.input_event(event)
@@ -122,20 +122,31 @@ func _on_screen_resized():
 #######
 ####### Functions
 #######
+
+func disabled_input_on_all_childs (node : Node):
+	node.set_meta("set_process_input_SVG", node.is_processing_input())
+	node.set_process_input(false)
+	for n in node.get_children():
+		if n is Node:
+			disabled_input_on_all_childs(n)
+
 func disabled_input_on_all_cli_Node2D(tree : SceneTree):
 	for n in tree.root.get_children():
-		if (n is Node) and n.name!="srvtree_manager":
-			var n1 : Node = n #for autocompletion
-			n1.set_meta("set_process_input_SVG", n1.is_processing_input())
-			n1.set_process_input(false)
+		if (n is Node) and n.name!="srvtree_manager" and n.name!="common_key_shortcut":
+			disabled_input_on_all_childs(n)
+
+func restore_input_on_all_childs (node : Node):
+	if node.has_meta("set_process_input_SVG"):
+		var val = node.get_meta("set_process_input_SVG")
+		node.set_process_input(bool(val))
+	for n in node.get_children():
+		if n is Node:
+			restore_input_on_all_childs(n)	
 
 func restore_input_on_all_cli_Node2D(tree : SceneTree):
 	for n in tree.root.get_children():
-		if (n is Node) and n.name!="srvtree_manager":
-			var n1 : Node = n #for autocompletion
-			if n1.has_meta("set_process_input_SVG"):
-				var val = n1.get_meta("set_process_input_SVG")
-				n1.set_process_input(bool(val))
+		if (n is Node) and n.name!="srvtree_manager" and n.name!="common_key_shortcut":
+			restore_input_on_all_childs (n)
 
 
 

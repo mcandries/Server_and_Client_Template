@@ -86,6 +86,7 @@ func DisconnectFromServer():
 	cw.print("Close Network client connection")
 	networkENet = null
 	get_tree().network_peer = null
+	cli_unload_level()
 	#get_tree().change_scene("res://Menu.tscn")
 
 func _Connection_Failed():
@@ -106,13 +107,20 @@ func _on_latencyTimer_timeout():
 	get_tree().multiplayer.poll()
 
 func cli_change_level (level):
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_cli/scripts/cli_gameengine.gd"))
 	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["cli"]))
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(false)
+	get_tree().root.get_node("/root/RootScene/ActiveScene")._ready_level(level)
+	
+func cli_unload_level ():
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(Reference.new())
 
 func cli_process_level():
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(true)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(true)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(true)
 	
 #######
 ####### RPC Functions

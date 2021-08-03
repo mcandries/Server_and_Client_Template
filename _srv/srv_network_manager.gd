@@ -122,6 +122,7 @@ func StopServer():
 			else : 
 				cw.print("[SRV] Error while trying to deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
 	cw.print("[SRV]Server stopped")
+	srv_unload_level()
 	utils.change_scene(get_tree(),load("res://_srv/srv_offline_scene.tscn"))
 
 
@@ -151,13 +152,21 @@ func _on_latencyTimer_timeout():
 	players_infos_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
 
 func srv_change_level (level):
-	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["srv"]))
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_srv/scripts/srv_gameengine.gd"))
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(false)
+	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["srv"]))
+	# need to call _ready by ourself
+	get_tree().root.get_node("/root/RootScene/ActiveScene")._ready_level(level)
+
+func srv_unload_level ():
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(Reference.new())
 
 func srv_process_level():
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(true)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(true)
+	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(true)
 
 func reset_all_players_level_loaded():
 	for p in players_list:
@@ -185,8 +194,8 @@ remote func S_RCV_ask_launching_game():
 		if all_ready:
 			networkENet.refuse_new_connections = true
 			players_list[peerId]["level_loaded"]
-			rpc ("C_RCV_change_level" , "level1")
-			srv_change_level ("level1")
+			rpc ("C_RCV_change_level" , "Level1")
+			srv_change_level ("Level1")
 
 remote func S_RCV_level_loaded(level):
 	var peerId = get_tree().get_rpc_sender_id()
