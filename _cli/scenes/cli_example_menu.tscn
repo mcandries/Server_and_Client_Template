@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://ressources/themes/game_gui_theme.tres" type="Theme" id=1]
 [ext_resource path="res://_cli/scenes/cli_example_menu.gd" type="Script" id=2]
 [ext_resource path="res://_cli/arts/carlsberg-4k.jpg" type="Texture" id=3]
-[ext_resource path="res://icon.png" type="Texture" id=4]
 
 [node name="Menu" type="CenterContainer"]
 anchor_right = 1.0
@@ -19,7 +18,8 @@ __meta__ = {
 }
 
 [node name="carlsberg-4k" type="Sprite" parent="."]
-position = Vector2( 1921.31, 1079.4 )
+position = Vector2( 1922.3, 1077.81 )
+scale = Vector2( 1.12199, 1.12199 )
 texture = ExtResource( 3 )
 
 [node name="VBox" type="VBoxContainer" parent="."]
@@ -222,36 +222,6 @@ margin_right = 800.0
 margin_bottom = 172.0
 rect_min_size = Vector2( 800, 80 )
 text = "Create Server Only"
-
-[node name="icon" type="Sprite" parent="."]
-position = Vector2( -67.3671, 238.197 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
-[node name="icon2" type="Sprite" parent="."]
-position = Vector2( -72.1955, 1446.96 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
-[node name="icon3" type="Sprite" parent="."]
-position = Vector2( 1597.5, 2248.66 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
-[node name="icon4" type="Sprite" parent="."]
-position = Vector2( 2174.41, 2244.66 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
-[node name="icon5" type="Sprite" parent="."]
-position = Vector2( 3916.47, 1847.54 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
-[node name="icon6" type="Sprite" parent="."]
-position = Vector2( 3910.43, 362.52 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
 
 [connection signal="pressed" from="VBox/ButtonSolo" to="." method="_on_ButtonSolo_pressed"]
 [connection signal="pressed" from="VBox/ButtonCreateGame" to="." method="_on_ButtonCreateGame_pressed"]

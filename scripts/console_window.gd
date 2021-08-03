@@ -27,7 +27,7 @@ func _ready():
 			break
 
 func _input(event):
-	if Input.is_action_just_pressed("k_f1"):
+	if Input.is_action_just_pressed("ui_switch_console_visibility"):
 		if is_instance_valid(console_window) :
 			console_window.visible = !console_window.visible
 
