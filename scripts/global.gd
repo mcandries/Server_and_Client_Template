@@ -14,13 +14,20 @@ var process_delta_tick  : float = 0.0
 var process_delta 		: float = 0.0
 var process_tick  		: int = 0
 
+var phy_tick_counter_last_frame = 0
+
 func _physics_process(delta):
 	process_physics_delta = delta
 	process_physics_delta_tick = delta*1000
 	process_physics_tick = OS.get_ticks_msec()
+	phy_tick_counter_last_frame +=1
 
 
 func _process(delta):
+	print (phy_tick_counter_last_frame)
 	process_delta = delta
 	process_tick = OS.get_ticks_msec()
 	process_delta_tick = delta*1000
+	phy_tick_counter_last_frame = 0
+	
+	

@@ -28,10 +28,11 @@ func _ready_level(level):
 
 	var j = 1
 	for p in gb.srv_network_manager.players_list:
-		var tank = Tank.instance()
+		var tank : CTank = Tank.instance()
 		tank.name = str (p)
 		srv_levelscene.get_node("Tanks").add_child(tank, true)
 		tank.init_position (srv_levelscene.get_node ("Spawns/Spawn" + str(j)).position)	
+		tank.server_mode = true
 		srv_players_tanks_nodes[str (p)] = tank
 		srv_players_tanks_last_infos[str (p)] = {
 			"PosX" : tank.kinematic_node.position.x,

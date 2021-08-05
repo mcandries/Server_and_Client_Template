@@ -43,6 +43,7 @@ func add_player_tank (tankID : String, position : Vector2):
 		my_tank = tank
 	cli_levelscene.get_node("Tanks").add_child(tank, true)		
 	tank.init_position(position)
+	tank.smooth_node.teleport()
 
 func send_position_to_server():
 	if is_instance_valid(my_tank):

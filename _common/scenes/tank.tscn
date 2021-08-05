@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 [ext_resource path="res://_common/scenes/tank.gd" type="Script" id=2]
 [ext_resource path="res://_common/scenes/tank_d_Infos.gd" type="Script" id=3]
+[ext_resource path="res://addons/smoothing/smoothing_2d.gd" type="Script" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 64, 96 )
@@ -12,7 +13,12 @@ script = ExtResource( 2 )
 
 [node name="C_VisualNode" type="Node2D" parent="."]
 
-[node name="C_icon" type="Sprite" parent="C_VisualNode"]
+[node name="Smoothing2D" type="Node2D" parent="C_VisualNode"]
+script = ExtResource( 4 )
+target = NodePath("../../KinematicBody2D")
+flags = 7
+
+[node name="C_icon" type="Sprite" parent="C_VisualNode/Smoothing2D"]
 scale = Vector2( 2, 3 )
 texture = ExtResource( 1 )
 
