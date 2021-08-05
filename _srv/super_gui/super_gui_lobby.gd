@@ -7,8 +7,10 @@ func _ready():
 	pass
 	
 func _process(delta):
+
+	# #Quick&Dirty !	
 	itemListPlayers.clear()
 	for player in gb.srv_network_manager.players_list.values():
-		itemListPlayers.add_item(player["player_name"])
+		itemListPlayers.add_item(str (player))
 		
 	

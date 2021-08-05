@@ -80,14 +80,14 @@ func _on_players_infos_updated():
 func _on_disconnected_from_server():
 	if gb.srv_network_manager.server_running:
 		gb.srv_network_manager.StopServer()
-	utils.change_scene(get_tree(), load ("res://_cli/scenes/cli_example_menu.tscn"))
+	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
 
 
 func _on_ButtonLeave_pressed():
 	gb.cli_network_manager.DisconnectFromServer()
 	if gb.srv_network_manager.server_running:
 		gb.srv_network_manager.StopServer()
-	utils.change_scene(get_tree(), load ("res://_cli/scenes/cli_example_menu.tscn"))
+	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
 
 
 func _on_ButtonReady_pressed():

@@ -20,11 +20,3 @@ func _input(event):
 ####### Functions
 #######
 
-#func change_scene (scene : PackedScene):
-#	for n in $ActiveScene:
-#		n.queue_free()
-#	$ActiveScene.add_child(scene.instance())
-#	$SrvDefaultBackground.visible = false
-#
-#func scene_server_offline ():
-#	$SrvDefaultBackground.visible = true

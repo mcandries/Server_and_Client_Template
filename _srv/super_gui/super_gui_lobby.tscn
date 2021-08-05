@@ -6,7 +6,7 @@
 [node name="SuperGuiLobby" type="CenterContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_min_size = Vector2( 1920, 1080 )
+rect_min_size = Vector2( 3840, 2160 )
 mouse_filter = 2
 theme = ExtResource( 2 )
 script = ExtResource( 1 )
@@ -15,11 +15,11 @@ __meta__ = {
 }
 
 [node name="ItemListPlayers" type="ItemList" parent="."]
-margin_left = 1720.0
-margin_top = 780.0
-margin_right = 2120.0
-margin_bottom = 1380.0
-rect_min_size = Vector2( 400, 600 )
+margin_left = 960.0
+margin_top = 540.0
+margin_right = 2880.0
+margin_bottom = 1620.0
+rect_min_size = Vector2( 1920, 1080 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 auto_height = true

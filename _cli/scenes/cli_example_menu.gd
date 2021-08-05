@@ -46,7 +46,7 @@ func _on_ButtonCreateServer_pressed():
 
 
 func _on_connected_to_server():
-	utils.change_scene(get_tree(), load ("res://_cli/scenes/cli_example_lobby.tscn"))
+	utils.change_scene(get_tree(), "res://_cli/scenes/cli_example_lobby.tscn")
 
 func _on_disconnected_from_server():
 	pass

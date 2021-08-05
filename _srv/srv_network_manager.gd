@@ -22,10 +22,9 @@ var upnpPortDeleteResult
 
 var server_public_ip = ""
 
-var latencyTimer : Timer
+var latencyTimers := []
 
 var players_list = {}
-
 var players_infos = {}
 
 const player_template = {
@@ -99,18 +98,23 @@ func start_network_server (local := true, port := 12121):
 				else : 
 					cw.print("[SRV] Warning : failed when trying to open port " + str(port) + " on gateway (ERROCODE: "+str (upnpPortResult)+")")
 	
-	latencyTimer = Timer.new()
+	 
+	var latencyTimer = Timer.new()
 	latencyTimer.wait_time = latencyUpdateFrequency
 	latencyTimer.connect("timeout", self, "_on_latencyTimer_timeout")
 	self.add_child(latencyTimer)
+	latencyTimers.append(latencyTimer)
 	latencyTimer.start()
 	cw.print("[SRV] Network server opened")
 	server_running = true
-	utils.change_scene(get_tree(),load("res://_srv/srv_online_scene.tscn"))
+	utils.change_scene(get_tree(),"res://_srv/srv_online_scene.tscn")
 	
 	
 
 func StopServer():
+	for timer in latencyTimers :
+		timer.queue_free()
+	latencyTimers.clear()
 	networkENet.close_connection(0)
 	get_tree().network_peer = null
 	server_running = false
@@ -121,9 +125,11 @@ func StopServer():
 				cw.print("[SRV] Deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
 			else : 
 				cw.print("[SRV] Error while trying to deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
-	cw.print("[SRV]Server stopped")
+	players_infos = {}
+	players_list = {}
 	srv_unload_level()
-	utils.change_scene(get_tree(),load("res://_srv/srv_offline_scene.tscn"))
+	cw.print("[SRV]Server stopped")
+	utils.change_scene(get_tree(),"res://_srv/srv_offline_scene.tscn")
 
 
 func _Peer_Connected (peerId):
@@ -156,7 +162,7 @@ func srv_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(false)
-	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["srv"]))
+	utils.change_scene(get_tree(), cm.levels_scenes_list["scenes"][level]["srv"])
 	# need to call _ready by ourself
 	get_tree().root.get_node("/root/RootScene/ActiveScene")._ready_level(level)
 

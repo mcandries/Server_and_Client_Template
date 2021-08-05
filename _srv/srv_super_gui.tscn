@@ -13,25 +13,62 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonLobby" type="Button" parent="."]
-margin_left = 3551.36
-margin_top = 28.1588
-margin_right = 3829.36
-margin_bottom = 145.159
-text = "See Lobby"
+[node name="VBoxLeft" type="VBoxContainer" parent="."]
+margin_left = 10.0793
+margin_top = 7.55951
+margin_right = 212.079
+margin_bottom = 51.5595
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonFS" type="Button" parent="."]
-margin_left = 17.6392
-margin_top = 17.6389
-margin_right = 219.639
-margin_bottom = 61.6389
+[node name="ButtonFS" type="Button" parent="VBoxLeft"]
+margin_right = 202.0
+margin_bottom = 44.0
 text = "FullScreen"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="ButtonLobby" to="." method="_on_Button_pressed"]
-[connection signal="pressed" from="ButtonFS" to="." method="_on_ButtonFS_pressed"]
+[node name="VBoxRight" type="VBoxContainer" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -407.973
+margin_top = 12.5992
+margin_right = -7.97266
+margin_bottom = 200.599
+rect_min_size = Vector2( 400, 0 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonLobby" type="Button" parent="VBoxRight"]
+margin_right = 400.0
+margin_bottom = 44.0
+text = "See Lobby"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonStopServer" type="Button" parent="VBoxRight"]
+margin_top = 48.0
+margin_right = 400.0
+margin_bottom = 92.0
+text = "Stop Server"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonKillTree" type="Button" parent="VBoxRight"]
+margin_top = 96.0
+margin_right = 400.0
+margin_bottom = 140.0
+text = "Kill Srv Tree"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="VBoxLeft/ButtonFS" to="." method="_on_ButtonFS_pressed"]
+[connection signal="pressed" from="VBoxRight/ButtonLobby" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="VBoxRight/ButtonStopServer" to="." method="_on_ButtonStopServer_pressed"]
+[connection signal="pressed" from="VBoxRight/ButtonKillTree" to="." method="_on_ButtonKillTree_pressed"]

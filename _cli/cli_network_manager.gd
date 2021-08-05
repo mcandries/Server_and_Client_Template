@@ -83,11 +83,10 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 
 
 func DisconnectFromServer():
+	cliLatencyTimer.queue_free()
 	cw.print("Close Network client connection")
 	networkENet = null
 	get_tree().network_peer = null
-	cli_unload_level()
-	#get_tree().change_scene("res://Menu.tscn")
 
 func _Connection_Failed():
 	cw.print("Client connection failed")
@@ -108,7 +107,7 @@ func _on_latencyTimer_timeout():
 
 func cli_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_cli/scripts/cli_gameengine.gd"))
-	utils.change_scene(get_tree(), load (gb.levels_scenes_list["scenes"][level]["cli"]))
+	utils.change_scene(get_tree(), cm.levels_scenes_list["scenes"][level]["cli"])
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(false)

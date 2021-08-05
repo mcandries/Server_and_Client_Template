@@ -1,9 +1,7 @@
 extends Node2D
 
-const cli_entry_scene = preload("res://_cli/scenes/cli_example_menu.tscn")
-
 func _ready():
-	utils.change_scene(get_tree(), cli_entry_scene)
+	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
 
 func _process(delta):
 	pass
