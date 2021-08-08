@@ -18,3 +18,12 @@ func _input(event):
 					yield(get_tree().create_timer(0.25),"timeout")
 					gb.cli_network_manager.set_ready (true)
 					gb.cli_network_manager.launch_game()
+
+			#shortcut for debug
+			if event.scancode==KEY_F3 and event.is_pressed() and not event.is_echo() :
+				if not (gb.srv_network_manager.server_running):
+					#Start server on localhost
+					gb.cli_network_manager.start_network_client ("127.0.0.1", 12121, "Duky")
+					yield(get_tree().create_timer(0.25),"timeout")
+					gb.cli_network_manager.set_ready (true)
+					gb.cli_network_manager.launch_game()

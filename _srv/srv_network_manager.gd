@@ -159,6 +159,7 @@ func _on_latencyTimer_timeout():
 
 func srv_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_srv/scripts/srv_gameengine.gd"))
+	get_tree().root.get_node("/root/RootScene/ActiveScene").get_script().reload()
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process_input(false)

@@ -23,11 +23,15 @@ var players_infos = {}
 var players_list = {}
 var is_game_owner = false
 
+
+var srv_ask_for_connected_player_info = false  #workaround for server refuse connection does'nt work on cli side
+
 func init_var():
 	networkENet = NetworkedMultiplayerENet.new()
 	players_list = {}
 	players_infos = {}
 	is_game_owner = false
+	srv_ask_for_connected_player_info = false
 	server_ip = ""
 
 func _ready():
@@ -83,6 +87,7 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 
 
 func DisconnectFromServer():
+	cli_unload_level()
 	cliLatencyTimer.queue_free()
 	cw.print("Close Network client connection")
 	networkENet = null
@@ -93,8 +98,14 @@ func _Connection_Failed():
 	DisconnectFromServer()
 
 func _Connection_Succeeded():
-	cw.print("Client establish connection to server")
-	emit_signal("connected_to_server")
+	cw.print("Client establish TCP connection to server ")
+	yield (get_tree().create_timer(1), "timeout")
+	if srv_ask_for_connected_player_info :
+		cw.print("Client establish connection with the server")	
+	else:
+		cw.print("Server doesn't accept new connection")	
+	#emit_signal("connected_to_server")  #not here because it can Connect even if server refuse new network connection...
+										 #now done in "C_EMT_connected_player_info"
 
 func _Server_Disconnected():
 	cw.print("Client disconnected from server")
@@ -107,6 +118,7 @@ func _on_latencyTimer_timeout():
 
 func cli_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_cli/scripts/cli_gameengine.gd"))
+	get_tree().root.get_node("/root/RootScene/ActiveScene").get_script().reload(false)
 	utils.change_scene(get_tree(), cm.levels_scenes_list["scenes"][level]["cli"])
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(false)
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_physics_process(false)
@@ -138,6 +150,8 @@ func set_ready(ready):
 
 puppet func C_EMT_connected_player_info ():
 	rpc_id(1, "S_RCV_connected_player_info", { "player_name" : nickname})
+	srv_ask_for_connected_player_info = true
+	emit_signal("connected_to_server")
 
 puppet func C_RCV_change_level (level):
 	cli_change_level (level)

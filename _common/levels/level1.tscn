@@ -8,12 +8,15 @@
 
 [node name="Spawn1" type="Node2D" parent="Spawns"]
 position = Vector2( 1912, 184 )
+rotation = 1.83259
 
 [node name="Spawn2" type="Node2D" parent="Spawns"]
 position = Vector2( 2784, 1376 )
+rotation = -2.09439
 
 [node name="Spawn3" type="Node2D" parent="Spawns"]
 position = Vector2( 264, 1904 )
+rotation = -0.523598
 
 [node name="Walls" type="Node2D" parent="."]
 
