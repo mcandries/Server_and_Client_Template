@@ -25,6 +25,11 @@ _global_script_classes=[ {
 "path": "res://_cli/cli_network_manager.gd"
 }, {
 "base": "Node2D",
+"class": "Smooth2D",
+"language": "GDScript",
+"path": "res://addons/smooth/smooth2d.gd"
+}, {
+"base": "Node2D",
 "class": "Smoothing2D",
 "language": "GDScript",
 "path": "res://addons/smoothing/smoothing_2d.gd"
@@ -38,6 +43,7 @@ _global_script_class_icons={
 "CPreloader": "",
 "CTank": "",
 "Cli_Network_Manager": "",
+"Smooth2D": "",
 "Smoothing2D": "",
 "Srv_Network_Manager": ""
 }
@@ -72,7 +78,7 @@ window/size/test_height=1080
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/smoothing/plugin.cfg" )
+enabled=PoolStringArray( "res://addons/smooth/plugin.cfg" )
 
 [gdnative]
 

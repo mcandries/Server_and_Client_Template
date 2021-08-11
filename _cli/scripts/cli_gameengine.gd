@@ -51,24 +51,13 @@ func _physics_process(delta):
 	send_position_to_server()
 		
 	if cli_ws_buffer_loaded:
-#		var i
-#		var current_tick = OS.get_ticks_msec()
-#		var physics_tick_duration = 1000/ Engine.iterations_per_second
-		
-#		if (world_states[cli_ws_previous_index]["CT"]+physics_tick_duration) <current_tick:
-#			world_states.pop_front()
-#			prints(["make an exprapoled"])
-#			world_states[cli_ws_current_index] = create_extrapolate_world_state(world_states[cli_ws_current_index]))
-
-#		if world_states.size() >= 
-
 		if not cli_ws_nexts.has(current_INB+1):
-			create_extrapolate_world_state()
+			cli_extrapolate_objects(delta)
 			cli_ws_continuous_used_extrapolated +=1
-#			pop_ws()
+#			rotate_ws()
 		else :
 			cli_ws_continuous_used_extrapolated = 0
-			pop_ws()
+			rotate_ws()
 			update_real_world_with_world_state()
 
 		if cli_ws_continuous_used_extrapolated>cli_ws_max_continuous_used_extrapolated:
@@ -87,12 +76,8 @@ func _input(event):
 			gb.srv_network_manager.StopServer()
 		utils.change_scene(get_tree(),cm.basics_scenes_list["menu"])
 
-func pop_ws():
-	cli_ws_previous[cli_ws_current["INB"]] = cli_ws_current
-	if cli_ws_previous.size()>cli_ws_previous_buffersize:
-		for k in cli_ws_previous.keys():
-			if k<current_INB-cli_ws_previous_buffersize:
-				cli_ws_previous.erase(k)	
+func rotate_ws():
+	move_current_ws_to_previous_ws ()
 
 	cli_ws_current = {}  #to crash
 	if cli_ws_nexts.size()>0: 
@@ -103,10 +88,16 @@ func pop_ws():
 #	if cli_ws_nexts.size()>cli_ws_nexts_buffersize:
 #		cli_ws_nexts.pop_front()
 
+func move_current_ws_to_previous_ws():
+	cli_ws_previous[cli_ws_current["INB"]] = cli_ws_current
+	if cli_ws_previous.size()>cli_ws_previous_buffersize:
+		for k in cli_ws_previous.keys():
+			if k<current_INB-cli_ws_previous_buffersize:
+				cli_ws_previous.erase(k)
+				
+
 func update_real_world_with_world_state () :
 	var wstate = cli_ws_current
-	if wstate["extrapolated"]:
-		cw.print ("use extrapolated!")
 	for tankID in wstate["tanks"]:
 		var tankVAL = wstate["tanks"][tankID]
 		if not cli_players_tanks_nodes.has(tankID):
@@ -118,59 +109,21 @@ func update_real_world_with_world_state () :
 					cli_players_tanks_nodes[tankID].kinematic_node.rotation = float (tankVAL["Rot"])
 					cli_players_tanks_nodes[tankID].angle = float (tankVAL["Angle"])
 					cli_players_tanks_nodes[tankID].speed = float (tankVAL["Speed"])
-				
-					if wstate["extrapolated"]:
-						cw.prints (["extrapolated valuers", str(cli_players_tanks_nodes[tankID]) ])
-						
+					
 				else: #if it's information about my tank, let's correct my position :
 					# TO-DO
 						#si extrapolation, on resync sur l'extrapolation locale ou on laisse comme on est ?
 						pass
 
 
-func create_extrapolate_world_state():
-	
-#	var ws_extrapolated = {
-#		"extrapolated" : true,
-#		"CT" : OS.get_ticks_msec(),
-#		"INB" : current_INB+1,
-#		"tanks" : {}
-#		}
-	
-	
+func cli_extrapolate_objects(delta):
+	cw.print("CLI extrapolated move objects")
 	for tankKEY in cli_players_tanks_nodes:
 		var tankVAL : CTank = cli_players_tanks_nodes[tankKEY]  #for autocompletion
 		if tankKEY != str(get_tree().get_network_unique_id()):
-			tankVAL.physic_extrapolate()
-	
-	cw.print("CLI extrapolated moved")		
-#		ws_extrapolated["tanks"][tank.name] = {}
-#		ws_extrapolated["tanks"][tank.name]["PosX"]  = tank.kinematic_node.position.x
-#		ws_extrapolated["tanks"][tank.name]["PosY"]  = tank.kinematic_node.position.y
-#		ws_extrapolated["tanks"][tank.name]["Rot"]   = tank.kinematic_node.rotation
-#		ws_extrapolated["tanks"][tank.name]["Angle"] = tank.angle
-	
-#	cli_ws_nexts[current_INB+1] = ws_extrapolated
+			tankVAL.physic_extrapolate(delta)
 
-#	var youngest_previous = cli_ws_previous[cli_ws_previous.keys().max()]
-#
-#
-#	for tankID in cli_ws_current["tanks"]:
-#		var tankVAL_current = cli_ws_current["tanks"][tankID]
-#		var tankVAL_previous = {}
-#		if youngest_previous["tanks"].has(tankID): 
-#			tankVAL_previous = youngest_previous["tanks"][tankID]	
-#
-#		ws_extrapolated["tanks"] = { tankID : {} }
-#
-#		var tank : CTank = cli_players_tanks_nodes[tankID]
-#		var new_interpolated_angle      = tankVAL_current["Angle"] + (tankVAL_current["Angle"]  - tankVAL_previous["Angle"])
-#		var new_interpolated_vector_x   = tankVAL_current["PosX"]   - tankVAL_previous["PosX"]
-#		var new_interpolated_vector_y   = tankVAL_current["PosY"]   - tankVAL_previous["PosY"]
-#
-#		tank.angle = new_interpolated_angle
-#		tank.rotate_tank()
-#		tank.kinematic_node.move_and_slide()
+
 
 
 	
@@ -217,7 +170,7 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 
 	wstate["CT"] = OS.get_ticks_msec()
 	wstate["INB"] = int (wstate["INB"])
-	wstate["extrapolated"] = false
+#	wstate["extrapolated"] = false
 
 	if not cli_ws_buffer_loaded : #init phase
 		# TODO : be sure the INB follow themself between the 3 
@@ -234,7 +187,10 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 		if wstate["INB"]<cli_ws_current["INB"] :
 			return
 		
-		if cli_ws_current["extrapolated"] and  wstate["INB"]==cli_ws_current["INB"] :
+#		if cli_ws_current["extrapolated"] and  wstate["INB"]==cli_ws_current["INB"] :
+		if  wstate["INB"] == current_INB:
+			cw.prints(["[CLI] Late received World State, immediate sync to it"])
+			move_current_ws_to_previous_ws()
 			cli_ws_current = wstate
 			update_real_world_with_world_state()
 		
@@ -243,10 +199,11 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 				cli_ws_nexts[wstate["INB"]] = wstate
 				cli_ws_buffer_loaded = true
 		
-		#if the client goes to far late, need to hard resync it
+		#if the client goes too far late, need to hard resync it
 		if wstate["INB"] > cli_ws_current["INB"]+ws_max_delta:
+			cw.prints(["[CLI] ", ws_max_delta, " ITS behind server, hard resync"])
 			while current_INB< wstate["INB"]-ws_max_delta:
-				pop_ws()
+				rotate_ws()
 			update_real_world_with_world_state()
 	
 #	if wstate["T"]>ST_last_received_wstate:
