@@ -1,29 +1,33 @@
+class_name Cli_Game_Engine
 extends CPreloader
+
 
 onready var tank_root_node = get_node ("Level/Tanks")
 
 var cli_levelscene : Node2D
-
-#var world_states = []
-#var cli_ws_previous_index = 0
-#var cli_ws_current_index = 1
-#var cli_ws_next_index = 2
-#const cli_nb_ws = 3
 
 var current_INB = 0
 var cli_ws_previous = {}
 var cli_ws_previous_buffersize = 2
 var cli_ws_current	= {}
 var cli_ws_nexts	= {}
-var ws_max_delta = 3  #max 3 TPS behind the server
+#var ws_max_delta = 3  #max 3 TPS behind the server
 ########################################################
-var cli_ws_buffer_loaded_initial_size = max (1, Engine.iterations_per_second/30) 
+var cli_ws_next_buffer_size = 1 + Engine.iterations_per_second/30
 ########################################################
 var cli_ws_buffer_loaded = false
 var cli_ws_continuous_used_extrapolated = 0
 var cli_ws_max_continuous_used_extrapolated = 300 / ( 1000/Engine.iterations_per_second) # ~300ms continuous extrapolation maximum
 #var cli_ws_max_continuous_used_extrapolated = 1000
 
+var total_frame_with_wstate := 0
+var total_frame_without_wstate := 0
+var total_frame_with_wstate_5s := 0
+var total_frame_without_wstate_5s := 0
+var total_frame_with_wstate_5s_array := []
+var total_frame_without_wstate_5s_array := []
+const stats_5s_duration := 5.0
+const stats_5s_refresh_delay := 0.2
 
 var ST_last_received_wstate : int = 0
 
@@ -35,13 +39,22 @@ var input_vector := Vector2 (0,0)
 
 #done by cl_network_manager when changing level
 func _ready_level(level):
+	gb.cli_game_engine = self
 	cli_players_tanks_nodes = {}
 	cli_ws_previous = {}
 	cli_ws_current	= {}
 	cli_ws_nexts	= {}
+	total_frame_with_wstate = 0
+	total_frame_without_wstate = 0
 	
 	cli_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
 	gb.cli_network_manager.connect("disconnected_from_server",self, "_on_disconnected_from_server")
+	var t = Timer.new()
+	t.one_shot = false
+	t.wait_time = stats_5s_refresh_delay
+	self.add_child(t)
+	t.connect("timeout",self, "_5s_stat_reset")
+	t.start()
 
 func _process(delta):
 	pass
@@ -52,12 +65,19 @@ func _physics_process(delta):
 		
 	if cli_ws_buffer_loaded:
 		if not cli_ws_nexts.has(current_INB+1):
+			prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
 			cli_extrapolate_objects(delta)
 			cli_ws_continuous_used_extrapolated +=1
+			current_INB+=1
+			total_frame_without_wstate +=1
+			total_frame_without_wstate_5s +=1
 #			rotate_ws()
 		else :
+			prints ("F",current_INB+1, "has WSTATE")
 			cli_ws_continuous_used_extrapolated = 0
-			rotate_ws()
+			total_frame_with_wstate +=1
+			total_frame_with_wstate_5s +=1
+			rotate_ws(current_INB+1)
 			update_real_world_with_world_state()
 
 		if cli_ws_continuous_used_extrapolated>cli_ws_max_continuous_used_extrapolated:
@@ -65,7 +85,8 @@ func _physics_process(delta):
 			cli_ws_previous = {}
 			cli_ws_current	= {}
 			cli_ws_nexts	= {}
-			cw.print ("hard resync")
+			cw.prints (["Stop extrapolated (", cli_ws_continuous_used_extrapolated, "/",cli_ws_max_continuous_used_extrapolated, ") !"])
+			cli_ws_continuous_used_extrapolated = 0
 			return  #### We Stop interpolated and Hard Resync with server
 
 func _input(event):
@@ -76,8 +97,18 @@ func _input(event):
 			gb.srv_network_manager.StopServer()
 		utils.change_scene(get_tree(),cm.basics_scenes_list["menu"])
 
-func rotate_ws():
+
+func _exit_tree():
+	gb.cli_game_engine = null
+
+func rotate_ws(to : int):
 	move_current_ws_to_previous_ws ()
+
+	#if the NEXTS are too older, just erase them	
+	for key in cli_ws_nexts:
+		if key <to :
+			cli_ws_nexts.erase(key)
+			prints ("Rotate Erase too old Wstate", key)
 
 	cli_ws_current = {}  #to crash
 	if cli_ws_nexts.size()>0: 
@@ -85,8 +116,7 @@ func rotate_ws():
 		cli_ws_current = cli_ws_nexts [next_index]
 		cli_ws_nexts.erase(next_index)
 		current_INB = next_index
-#	if cli_ws_nexts.size()>cli_ws_nexts_buffersize:
-#		cli_ws_nexts.pop_front()
+		
 
 func move_current_ws_to_previous_ws():
 	cli_ws_previous[cli_ws_current["INB"]] = cli_ws_current
@@ -97,6 +127,7 @@ func move_current_ws_to_previous_ws():
 				
 
 func update_real_world_with_world_state () :
+	cli_ws_continuous_used_extrapolated = 0
 	var wstate = cli_ws_current
 	for tankID in wstate["tanks"]:
 		var tankVAL = wstate["tanks"][tankID]
@@ -160,51 +191,47 @@ puppet func C_RCV_ready_level (level):
 
 puppet func C_RCV_world_state (wstate : Dictionary):
 	
-	# si INB est < à INB de current : on drop, on ne fait rien, c'est trop vieux
-	#si current est extrapolé, et que INB extrapolé == INB reçu : on remplace currrent + update world
-	#si INB n'est pas dans le tableau next : on l'ajoute
-
-#	var wstate_INB = int (wstate["INB"])
-
-#	prints ("received world", wstate)
+	prints ("received world", wstate["INB"],"...")
 
 	wstate["CT"] = OS.get_ticks_msec()
 	wstate["INB"] = int (wstate["INB"])
-#	wstate["extrapolated"] = false
 
 	if not cli_ws_buffer_loaded : #init phase
-		# TODO : be sure the INB follow themself between the 3 
-		if cli_ws_previous.size()==0:
-			cli_ws_previous [wstate["INB"]] = wstate
-		elif cli_ws_current.empty() :
+		if cli_ws_current.empty() :
 			cli_ws_current = wstate
+			prints ("... and PREPARE BUFFER by push it in current")
 		else :
 			cli_ws_nexts [wstate["INB"]] = wstate
-			if cli_ws_nexts.size()>= cli_ws_buffer_loaded_initial_size:
-				current_INB = cli_ws_current["INB"]
+			prints ("... and PREPARE BUFFER by push it in next")
+			if cli_ws_nexts.size()>= cli_ws_next_buffer_size:
+				var taller_INB = cli_ws_nexts.keys().max()
+				current_INB = taller_INB - cli_ws_next_buffer_size
+#				current_INB = cli_ws_current ["INB"]
+				prints ("Init INB to", current_INB)
 				cli_ws_buffer_loaded = true
 	else :
-		if wstate["INB"]<cli_ws_current["INB"] :
+		if wstate["INB"]<current_INB :
+			prints ("... and ignore it ! (too old)", wstate["INB"],"<",current_INB)
 			return
 		
-#		if cli_ws_current["extrapolated"] and  wstate["INB"]==cli_ws_current["INB"] :
 		if  wstate["INB"] == current_INB:
-			cw.prints(["[CLI] Late received World State, immediate sync to it"])
+			cw.prints(["[CLI] Late received World State, immediate sync to it", current_INB])
 			move_current_ws_to_previous_ws()
 			cli_ws_current = wstate
 			update_real_world_with_world_state()
 		
-		if wstate["INB"]>cli_ws_current["INB"]:
+		if wstate["INB"]>current_INB:
 			if not cli_ws_nexts.has(wstate["INB"]):
 				cli_ws_nexts[wstate["INB"]] = wstate
-				cli_ws_buffer_loaded = true
+				prints ("... and add it to NEXT", wstate["INB"] )
 		
 		#if the client goes too far late, need to hard resync it
-		if wstate["INB"] > cli_ws_current["INB"]+ws_max_delta:
-			cw.prints(["[CLI] ", ws_max_delta, " ITS behind server, hard resync"])
-			while current_INB< wstate["INB"]-ws_max_delta:
-				rotate_ws()
-			update_real_world_with_world_state()
+		if wstate["INB"] > current_INB+cli_ws_next_buffer_size:
+#			cw.prints(["[CLI] More than ", ws_max_delta, " ITS behind server (", cli_ws_current["INB"], "), hard resync to ", wstate["INB"]])
+#			while current_INB< wstate["INB"]-ws_max_delta:
+			rotate_ws(wstate["INB"])
+			prints ("and force go to more recent INB :", current_INB )
+#			update_real_world_with_world_state()
 	
 #	if wstate["T"]>ST_last_received_wstate:
 #		ST_last_received_wstate = wstate["T"]
@@ -227,3 +254,13 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 func _on_disconnected_from_server():
 	gb.cli_network_manager.cli_unload_level()
 	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
+
+func _5s_stat_reset():
+	total_frame_with_wstate_5s_array.append(total_frame_with_wstate_5s)
+	total_frame_without_wstate_5s_array.append(total_frame_without_wstate_5s)
+	if total_frame_with_wstate_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:   
+		total_frame_with_wstate_5s_array.pop_front()
+	if total_frame_without_wstate_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:
+		total_frame_without_wstate_5s_array.pop_front()		
+	total_frame_with_wstate_5s = 0
+	total_frame_without_wstate_5s = 0

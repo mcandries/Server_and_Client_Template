@@ -92,6 +92,7 @@ func create_new_world_state() -> Dictionary:
 			"Angle" : 	tank.angle,
 			"Speed" : 	tank.speed,
 			}
+	prints ("[SRV] Create new WSTATE", wstate["INB"] )
 	return wstate
 
 
@@ -102,6 +103,8 @@ func create_new_world_state() -> Dictionary:
 func send_world_state_to_clients():
 	var i = min (srv_ws_current_index,  world_states.size()-1)
 	rpc_unreliable("C_RCV_world_state", world_states[i])
+#	rpc("C_RCV_world_state", world_states[i])
+	prints ("[SRV] Push new WSTATE to clients", world_states[i]["INB"] )
 	
 
 remote func S_RCV_player_position (msg):

@@ -6,6 +6,12 @@ var srv_network_manager : Srv_Network_Manager
 var project_design_width  : int = ProjectSettings.get_setting("display/window/size/width")
 var project_design_height : int = ProjectSettings.get_setting("display/window/size/height")
 
+var cli_game_engine : Cli_Game_Engine
+
+
+const DBG_DRAW_TANK_4_VECTORS = false
+const DBG_DRAW_TANK_ANGLE = false
+
 #var process_physics_delta_tick  : float = 0.0
 #var process_physics_delta 		: float = 0.0
 #var process_physics_tick        : int = 0

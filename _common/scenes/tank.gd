@@ -75,7 +75,7 @@ func physic_extrapolate(delta):
 func move_it(delta):
 	kinematic_node.rotation = lerp_angle(kinematic_node.rotation,angle, 0.2)
 	speed = clamp (speed, -500, 2000)
-#	speed = lerp (speed,0.0,0.04)
+	speed = lerp (speed,0.0,0.04)
 	vel = Vector2(0,-speed).rotated(kinematic_node.rotation)*delta
 #	prints ("avant move and slide",  vel, speed)
 	
@@ -90,8 +90,6 @@ func move_it(delta):
 	while j<8 :
 		if colission:
 			var decel = decelleration_curve.interpolate_baked ( abs(colission.normal.normalized().angle_to(new_vel)) / PI )
-			if decel!=0 :
-				print (decel)
 			speed -= speed * decel
 			prev_vel = new_vel
 			new_vel = colission.remainder.slide(colission.normal)

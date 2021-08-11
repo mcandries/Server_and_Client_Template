@@ -35,17 +35,34 @@ size_flags_vertical = 0
 text = "-"
 valign = 1
 
-[node name="LabelPing" type="Label" parent="HBox"]
+[node name="LabelIPS" type="Label" parent="HBox"]
 margin_left = 140.0
-margin_right = 230.0
+margin_right = 212.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "IPS:"
+valign = 1
+
+[node name="IPS" type="Label" parent="HBox"]
+margin_left = 216.0
+margin_right = 276.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 60, 0 )
+size_flags_vertical = 0
+text = "-"
+valign = 1
+
+[node name="LabelPing" type="Label" parent="HBox"]
+margin_left = 280.0
+margin_right = 370.0
 margin_bottom = 36.0
 size_flags_vertical = 0
 text = "Ping:"
 valign = 1
 
 [node name="Ping" type="Label" parent="HBox"]
-margin_left = 234.0
-margin_right = 294.0
+margin_left = 374.0
+margin_right = 434.0
 margin_bottom = 36.0
 rect_min_size = Vector2( 60, 0 )
 size_flags_vertical = 0
@@ -53,18 +70,54 @@ text = "-"
 valign = 1
 
 [node name="LabelTotalLatency" type="Label" parent="HBox"]
-margin_left = 298.0
-margin_right = 568.0
+margin_left = 438.0
+margin_right = 708.0
 margin_bottom = 36.0
 size_flags_vertical = 0
 text = "Total Latency :"
 valign = 1
 
 [node name="TotalLatency" type="Label" parent="HBox"]
-margin_left = 572.0
-margin_right = 632.0
+margin_left = 712.0
+margin_right = 772.0
 margin_bottom = 36.0
 rect_min_size = Vector2( 60, 0 )
 size_flags_vertical = 0
 text = "-"
+valign = 1
+
+[node name="LabelPourcentWithoutWSTATE" type="Label" parent="HBox"]
+margin_left = 776.0
+margin_right = 1100.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "Interpol. client :"
+valign = 1
+
+[node name="PourcentWihoutWSTATE" type="Label" parent="HBox"]
+margin_left = 1104.0
+margin_right = 1204.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 100, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
+valign = 1
+
+[node name="LabelPourcentWithoutWSTATE5SEC" type="Label" parent="HBox"]
+margin_left = 1208.0
+margin_right = 1586.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "Interpol. client 5s :"
+valign = 1
+
+[node name="PourcentWihoutWSTATE5SEC" type="Label" parent="HBox"]
+margin_left = 1590.0
+margin_right = 1690.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 100, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
 valign = 1

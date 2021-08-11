@@ -1,3 +1,4 @@
+
 extends Node
 
 ################################### Settings
@@ -200,7 +201,3 @@ func restore_input_on_all_cli_Node2D(tree : SceneTree):
 	for n in tree.root.get_children():
 		if (n is Node) and n.name!="srvtree_manager" and n.name!="common_key_shortcut":
 			restore_input_on_all_childs (n)
-
-
-
-
