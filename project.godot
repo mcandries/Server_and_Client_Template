@@ -34,11 +34,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/smooth/smooth2d.gd"
 }, {
-"base": "Node2D",
-"class": "Smoothing2D",
-"language": "GDScript",
-"path": "res://addons/smoothing/smoothing_2d.gd"
-}, {
 "base": "Node",
 "class": "Srv_Network_Manager",
 "language": "GDScript",
@@ -50,7 +45,6 @@ _global_script_class_icons={
 "Cli_Game_Engine": "",
 "Cli_Network_Manager": "",
 "Smooth2D": "",
-"Smoothing2D": "",
 "Srv_Network_Manager": ""
 }
 

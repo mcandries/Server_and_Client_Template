@@ -79,7 +79,7 @@ func physic_extrapolate(delta):
 func move_it(delta):
 	kinematic_node.rotation = lerp_angle(kinematic_node.rotation,angle, 0.2)
 	speed = clamp (speed, -500, 2000)
-#	speed = lerp (speed,0.0,0.04)
+	speed = lerp (speed,0.0,0.04)
 
 	vel = Vector2(0,-speed).rotated(kinematic_node.rotation)*delta
 #	prints ("avant move and slide",  vel, speed)

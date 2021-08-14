@@ -3,7 +3,7 @@ extends Node
 ################################### Settings
 const console_initial_visibility = true
 var console_label_line_to_draw		= 12
-var console_history_cache_line_size	= 1500
+var console_history_cache_line_size	= 1000
 ###################################
 
 #var Pconsole_Window 	= preload ("res://scenes/consoleWindow.tscn")

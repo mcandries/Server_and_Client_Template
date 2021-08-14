@@ -12,3 +12,13 @@ static func change_scene (tree : SceneTree, scene_path : String):
 		n.queue_free()
 	var scene = load (scene_path)
 	active_scene.add_child(scene.instance())
+
+
+static func array_find_first_greater_than (arr : Array, value) :
+	if arr:
+		var s_arr = arr.duplicate(false)
+		s_arr.sort()
+		for v in s_arr :
+			if v>value:
+				return v 
+	return false

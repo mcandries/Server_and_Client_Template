@@ -64,6 +64,8 @@ func _physics_process(delta):
 
 	if cli_ws_buffer_loaded:
 		if not cli_ws_nexts.has(current_INB+1):
+			##TODO : in case  we do not have this WS, but have a more recent, we should interpolate between the previous and the next WSTATE
+			## instead of extrapolate !
 			if gb.DBG_NET_PRINT_DEBUG: 
 				prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
 			cli_extrapolate_objects(delta)
@@ -80,6 +82,7 @@ func _physics_process(delta):
 			total_frame_with_wstate_5s +=1
 			rotate_ws(current_INB+1)
 			update_real_world_with_world_state()
+
 
 		if cli_ws_continuous_used_extrapolated>cli_ws_max_continuous_used_extrapolated:
 			cli_ws_buffer_loaded = false
@@ -156,7 +159,7 @@ func update_real_world_with_world_state () :
 
 
 func cli_extrapolate_objects(delta):
-	cw.print("[CLI] extrapolated move objects")
+#	cw.print("[CLI] extrapolated move objects")
 	for tankKEY in cli_players_tanks_nodes:
 		var tankVAL : CTank = cli_players_tanks_nodes[tankKEY]  #for autocompletion
 		if tankKEY != str(get_tree().get_network_unique_id()):
@@ -186,6 +189,7 @@ func add_player_tank (tankID : String, position : Vector2, rot : float):
 
 
 func send_position_to_server(INB):
+
 	if is_instance_valid(my_tank):
 		var msg = {
 			"INB"	: INB,
