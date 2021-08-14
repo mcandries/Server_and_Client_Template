@@ -6,13 +6,15 @@ var server_mode = false
 
 var decelleration_curve : Curve = preload("res://_common/ressources/curve_decelleration_by_angle.tres")
 
-var speed_previous := 0.0
-var angle_previous := 0.0
-var vel_previous  := Vector2.ZERO
+#var speed_previous := 0.0
+#var angle_previous := 0.0
 
-var speed := 0.0 			setget set_speed
-var angle := 0.0 			setget set_angle
-var vel   := Vector2.ZERO	setget set_vel
+var speed_last_input_change := 0.0
+var angle_last_input_change := 0.0
+
+var speed := 0.0 			#setget set_speed
+var angle := 0.0 			#setget set_angle
+var vel   := Vector2.ZERO	
 onready var kinematic_node	: KinematicBody2D 	= $KinematicBody2D
 onready var smooth_node 	: Smooth2D		    = $C_VisualNode/Smooth2D
 onready var camera_node		: Camera2D			= $C_VisualNode/Smooth2D/Camera2D
@@ -27,17 +29,13 @@ var right_angle_vec := Vector2.RIGHT
 var rear_angle_vec  := Vector2.DOWN
 var left_angle_vec  := Vector2.LEFT
 
-func set_speed(new_value):
-	speed_previous = speed
-	speed = new_value
-	
-func set_angle(new_value):
-	angle_previous = angle
-	angle = new_value
-
-func set_vel(new_value):
-	vel_previous = vel
-	vel = new_value
+#func set_speed(new_value):
+#	speed_previous = speed
+#	speed = new_value
+#
+#func set_angle(new_value):
+#	angle_previous = angle
+#	angle = new_value
 
 func _ready():
 	angle = kinematic_node.rotation
@@ -55,19 +53,25 @@ func _physics_process(delta):
 		pass
 	else : 	
 		if cli_owner:
-			self.angle += deg2rad( (Input.get_action_strength("ui_right")-Input.get_action_strength("ui_left"))*200*delta )  #1 degré en radian *3
-			self.speed += (Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")) * 1500*delta
+			angle_last_input_change = deg2rad( (Input.get_action_strength("ui_right")-Input.get_action_strength("ui_left"))*200*delta )  #1 degré en radian *3
+			self.angle += angle_last_input_change
+			speed_last_input_change = (Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")) * 1500*delta
+			self.speed += speed_last_input_change
+
+#			self.speed = lerp (speed,0.0,0.04)
 			move_it(delta)
 		
 
 
 func physic_extrapolate(delta):
 #	cw.prints(["angle", angle_previous, angle])
-	self.angle = angle + (angle-angle_previous)
+#	self.angle = angle + (angle-angle_previous)
+	angle = angle + angle_last_input_change
 #	cw.prints(["extrapoled angle : ", angle])
 	
 #	cw.prints(["speed", speed_previous, speed ])
-	self.speed = speed + (speed-speed_previous)
+#	self.speed = speed + (speed-speed_previous)
+	speed = speed + speed_last_input_change
 #	cw.prints(["extrapoled speed", speed])
 	move_it(delta)
 	
@@ -75,7 +79,8 @@ func physic_extrapolate(delta):
 func move_it(delta):
 	kinematic_node.rotation = lerp_angle(kinematic_node.rotation,angle, 0.2)
 	speed = clamp (speed, -500, 2000)
-	speed = lerp (speed,0.0,0.04)
+#	speed = lerp (speed,0.0,0.04)
+
 	vel = Vector2(0,-speed).rotated(kinematic_node.rotation)*delta
 #	prints ("avant move and slide",  vel, speed)
 	
@@ -143,10 +148,9 @@ func init_position(position : Vector2, rot : float):
 	kinematic_node.rotation = rot
 	smooth_node.rotation = rot
 	angle = rot
-	angle_previous = angle
+#	angle_previous = angle
 	speed = 0
-	speed_previous = 0
+#	speed_previous = 0
 	vel = Vector2.ZERO
-	vel_previous = Vector2.ZERO
 	smooth_node.teleport()
 	_update_4_angles()

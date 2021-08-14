@@ -8,7 +8,7 @@ var project_design_height : int = ProjectSettings.get_setting("display/window/si
 
 var cli_game_engine : Cli_Game_Engine
 
-
+const DBG_NET_PRINT_DEBUG = false
 const DBG_DRAW_TANK_4_VECTORS = false
 const DBG_DRAW_TANK_ANGLE = false
 

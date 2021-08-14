@@ -127,6 +127,7 @@ func cli_change_level (level):
 	
 func cli_unload_level ():
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(Reference.new())
+	get_tree().root.get_node("/root/RootScene/RootCamera2D").current = true
 
 func cli_process_level():
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_process(true)

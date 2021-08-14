@@ -171,6 +171,13 @@ ui_switch_scene_overlay={
  ]
 }
 
+[network]
+
+limits/debugger_stdout/max_chars_per_second=16384
+limits/debugger_stdout/max_messages_per_frame=80
+limits/debugger_stdout/max_errors_per_second=800
+limits/debugger_stdout/max_warnings_per_second=800
+
 [physics]
 
 common/physics_jitter_fix=0.0

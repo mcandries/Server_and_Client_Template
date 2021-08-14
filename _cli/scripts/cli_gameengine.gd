@@ -13,7 +13,8 @@ var cli_ws_current	= {}
 var cli_ws_nexts	= {}
 #var ws_max_delta = 3  #max 3 TPS behind the server
 ########################################################
-var cli_ws_next_buffer_size = 2 + Engine.iterations_per_second/30
+var cli_ws_next_buffer_size = (Engine.iterations_per_second/30) #+ 2  #### SHOULD WE DEFINE THE BUFFER SIZE DEPENDING ON WS CACHE MISSING ???
+var cli_ws_max_next_buffer_size = (Engine.iterations_per_second/30) + 10
 ########################################################
 var cli_ws_buffer_loaded = false
 var cli_ws_continuous_used_extrapolated = 0
@@ -63,7 +64,8 @@ func _physics_process(delta):
 
 	if cli_ws_buffer_loaded:
 		if not cli_ws_nexts.has(current_INB+1):
-			prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
 			cli_extrapolate_objects(delta)
 			cli_ws_continuous_used_extrapolated +=1
 			current_INB+=1
@@ -71,7 +73,8 @@ func _physics_process(delta):
 			total_frame_without_wstate_5s +=1
 #			rotate_ws()
 		else :
-			prints ("F",current_INB+1, "has WSTATE")
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("F",current_INB+1, "has WSTATE")
 			cli_ws_continuous_used_extrapolated = 0
 			total_frame_with_wstate +=1
 			total_frame_with_wstate_5s +=1
@@ -112,7 +115,8 @@ func rotate_ws(to : int):
 	for key in cli_ws_nexts:
 		if key <to :
 			cli_ws_nexts.erase(key)
-			prints ("Rotate Erase too old Wstate", key)
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("[CLI] Rotate Erase too old Wstate", key)
 
 	cli_ws_current = {}  #to crash
 	if cli_ws_nexts.size()>0: 
@@ -152,7 +156,7 @@ func update_real_world_with_world_state () :
 
 
 func cli_extrapolate_objects(delta):
-	cw.print("CLI extrapolated move objects")
+	cw.print("[CLI] extrapolated move objects")
 	for tankKEY in cli_players_tanks_nodes:
 		var tankVAL : CTank = cli_players_tanks_nodes[tankKEY]  #for autocompletion
 		if tankKEY != str(get_tree().get_network_unique_id()):
@@ -189,7 +193,9 @@ func send_position_to_server(INB):
 			"PosY" 	: my_tank.kinematic_node.position.y,
 			"Rot"  	: my_tank.kinematic_node.rotation,
 			"Speed"	: my_tank.speed,
+			"Speed_last_input_change" : my_tank.speed_last_input_change,
 			"Angle"	: my_tank.angle,
+			"Angle_last_input_change" : my_tank.angle_last_input_change,
 		}
 		rpc_unreliable_id(1, "S_RCV_player_position", msg)
 
@@ -200,7 +206,8 @@ puppet func C_RCV_ready_level (level):
 
 puppet func C_RCV_world_state (wstate : Dictionary):
 	
-	prints ("received world", wstate["INB"],"...")
+	if gb.DBG_NET_PRINT_DEBUG: 
+		prints ("[CLI] Received world", wstate["INB"],"...")
 
 	wstate["CT"] = OS.get_ticks_msec()
 	wstate["INB"] = int (wstate["INB"])
@@ -208,19 +215,23 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 	if not cli_ws_buffer_loaded : #init phase
 		if cli_ws_current.empty() :
 			cli_ws_current = wstate
-			prints ("... and PREPARE BUFFER by push it in current")
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("[CLI] ... and PREPARE BUFFER by push it in current")
 		else :
 			cli_ws_nexts [wstate["INB"]] = wstate
-			prints ("... and PREPARE BUFFER by push it in next")
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("[CLI] ... and PREPARE BUFFER by push it in next")
 			if cli_ws_nexts.size()>= cli_ws_next_buffer_size:
 				var taller_INB = cli_ws_nexts.keys().max()
 				current_INB = taller_INB - cli_ws_next_buffer_size
 #				current_INB = cli_ws_current ["INB"]
-				prints ("Init INB to", current_INB)
+				if gb.DBG_NET_PRINT_DEBUG: 
+					prints ("[CLI] Init INB to", current_INB)
 				cli_ws_buffer_loaded = true
 	else :
 		if wstate["INB"]<current_INB :
-			prints ("... and ignore it ! (too old)", wstate["INB"],"<",current_INB)
+			if gb.DBG_NET_PRINT_DEBUG: 
+				prints ("[CLI] ... and ignore it ! (too old)", wstate["INB"],"<",current_INB)
 			return
 		
 		if  wstate["INB"] == current_INB:
@@ -232,14 +243,20 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 		if wstate["INB"]>current_INB:
 			if not cli_ws_nexts.has(wstate["INB"]):
 				cli_ws_nexts[wstate["INB"]] = wstate
-				prints ("... and add it to NEXT", wstate["INB"] )
+				if gb.DBG_NET_PRINT_DEBUG: 
+					prints ("[CLI] ... and add it to NEXT", wstate["INB"] )
 		
 		#if the client goes too far late, need to hard resync it
 		if wstate["INB"] > current_INB+cli_ws_next_buffer_size:
 #			cw.prints(["[CLI] More than ", ws_max_delta, " ITS behind server (", cli_ws_current["INB"], "), hard resync to ", wstate["INB"]])
 #			while current_INB< wstate["INB"]-ws_max_delta:
-			rotate_ws(wstate["INB"])
-			prints ("and force go to more recent INB :", current_INB )
+			if cli_ws_next_buffer_size<cli_ws_max_next_buffer_size and wstate["INB"] == current_INB+cli_ws_next_buffer_size + 1 :
+				cli_ws_next_buffer_size += 1
+				cw.prints (["[CLI] Up cli_ws_next_buffer_size to :", cli_ws_next_buffer_size] )
+			else: 
+				rotate_ws(wstate["INB"])
+				if gb.DBG_NET_PRINT_DEBUG: 
+					prints ("[CLI] and force go to more recent INB :", current_INB )
 #			update_real_world_with_world_state()
 	
 #	if wstate["T"]>ST_last_received_wstate:

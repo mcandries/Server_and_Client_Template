@@ -42,9 +42,27 @@ func _ready():
 
 		# to hide viewport elsewise it draw on top of the main scenetree
 		srv_tree_viewport.render_target_update_mode = Viewport.UPDATE_DISABLED 
+
+
+		# TO DELETE with the new "MONO SCENE" method
+		var new_x_size : float
+		var new_y_size : float
+		var initial_aspect_ratio =  gb.project_design_width/float(gb.project_design_height)
+		var current_aspect_ratio = get_tree().root.size.x / get_tree().root.size.y*1.0
+		if current_aspect_ratio>initial_aspect_ratio: #we keep the Y size, and extend the X size
+			new_y_size = get_tree().root.size.y
+			new_x_size = int (round (new_y_size * initial_aspect_ratio))
+		else: #we keep the X size, and extend the Y size
+			new_x_size = get_tree().root.size.x
+			new_y_size = int(round(new_x_size / initial_aspect_ratio))
+		var  gui : CanvasLayer = get_node("/root/RootScene/GUI")
+		if is_instance_valid (gui):
+			gui.transform = gui.transform.scaled(Vector2(new_x_size/gb.project_design_width, new_y_size/gb.project_design_height))
 		
 		#load the srv root scene
 		srv_tree.change_scene(srv_tree_root_scene_path)
+
+
 
 	
 
@@ -161,10 +179,6 @@ func _on_screen_resized():
 			cli_tree_viewport_camera2D.zoom = Vector2 (gb.project_design_width/new_x_size, gb.project_design_height/new_y_size)
 		if is_instance_valid(srv_tree_current_cam):
 			srv_tree_current_cam.zoom = Vector2 (gb.project_design_width/new_x_size, gb.project_design_height/new_y_size)
-		
-		var  gui : CanvasLayer = get_node("/root/RootScene/GUI")
-		if is_instance_valid (gui):
-			gui.transform = gui.transform.scaled(Vector2(new_x_size/gb.project_design_width, new_y_size/gb.project_design_height))
 		
 		if srv_tree_enable : 
 			#make the Srv SceneTree size sync with the Windows Size when it's resized
