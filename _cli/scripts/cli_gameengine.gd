@@ -14,19 +14,28 @@ var cli_ws_nexts	= {}
 #var ws_max_delta = 3  #max 3 TPS behind the server
 ########################################################
 var cli_ws_next_buffer_size = (Engine.iterations_per_second/30) #+ 2  #### SHOULD WE DEFINE THE BUFFER SIZE DEPENDING ON WS CACHE MISSING ???
-var cli_ws_max_next_buffer_size = (Engine.iterations_per_second/30) + 10
+var cli_ws_max_next_buffer_size = (Engine.iterations_per_second/10) # ~100ms of buffer max
+var cli_ws_next_buffer_size_delay_upgrade := 300 #delay in ms before allowing to up buffer size of one
+var cli_ws_next_buffer_size_last_tick_upgrade := 0
 ########################################################
+var current_INB_decreased = false
 var cli_ws_buffer_loaded = false
 var cli_ws_continuous_used_extrapolated = 0
-var cli_ws_max_continuous_used_extrapolated = 300 / ( 1000/Engine.iterations_per_second) # ~300ms continuous extrapolation maximum
+var cli_ws_max_continuous_used_extrapolated = 500 / ( 1000/Engine.iterations_per_second) # ~500ms continuous extrapolation maximum
 #var cli_ws_max_continuous_used_extrapolated = 1000
 
+
+
 var total_frame_with_wstate := 0
-var total_frame_without_wstate := 0
+var total_frame_extrapolated := 0
+var total_frame_interpolated := 0
 var total_frame_with_wstate_5s := 0
-var total_frame_without_wstate_5s := 0
+var total_frame_extrapolated_5s := 0
+var total_frame_interpolated_5s := 0
 var total_frame_with_wstate_5s_array := []
-var total_frame_without_wstate_5s_array := []
+var total_frame_extrapolated_5s_array := []
+var total_frame_interpolated_5s_array := []
+var total_INB_decreased := 0
 const stats_5s_duration := 5.0
 const stats_5s_refresh_delay := 0.2
 
@@ -46,7 +55,9 @@ func _ready_level(level):
 	cli_ws_current	= {}
 	cli_ws_nexts	= {}
 	total_frame_with_wstate = 0
-	total_frame_without_wstate = 0
+	total_frame_extrapolated = 0
+	
+	cli_ws_next_buffer_size_last_tick_upgrade = OS.get_ticks_msec() #to avoid buffer upgrade in the next cli_ws_next_buffer_size_delay_upgrade MS
 	
 	cli_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
 	gb.cli_network_manager.connect("disconnected_from_server",self, "_on_disconnected_from_server")
@@ -63,25 +74,47 @@ func _process(delta):
 func _physics_process(delta):
 
 	if cli_ws_buffer_loaded:
+		if total_frame_extrapolated_5s >= ((Engine.iterations_per_second * stats_5s_refresh_delay) *0.75) and not current_INB_decreased:
+			#75% of last 200ms are extrapolated ? We back current_INB of 1
+			current_INB -=1
+			current_INB_decreased = true
+			if gb.DBG_NET_PRINT_DEBUG:
+					prints("[CLI] Reduce current_INB of 1 (Next is ",current_INB+1,")")
+			cw.prints(["[CLI] Reduce current_INB of 1 (Next is",current_INB+1,")"])
+			
 		if not cli_ws_nexts.has(current_INB+1):
-			##TODO : in case  we do not have this WS, but have a more recent, we should interpolate between the previous and the next WSTATE
-			## instead of extrapolate !
-			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
-			cli_extrapolate_objects(delta)
-			cli_ws_continuous_used_extrapolated +=1
-			current_INB+=1
-			total_frame_without_wstate +=1
-			total_frame_without_wstate_5s +=1
-#			rotate_ws()
+
+			var found_greater = utils.array_find_first_greater_than (cli_ws_nexts.keys(), current_INB+1 )
+			
+			if found_greater :
+				if gb.DBG_NET_PRINT_DEBUG:
+					prints("[CLI] F",current_INB+1, "no WSTATE, but a recent one is know, Interpolate world state")
+				if gb.DBG_SW_CW_X_POLATE:
+					cw.prints(["[CLI] F",current_INB+1, "no WSTATE, but a recent one is know, Interpolate world state"])
+				var interpolate_weight = 1.0 / (found_greater - (current_INB +1 -1 ))
+				var ws_interpolated = create_interpolated_wstate(cli_ws_nexts[found_greater], interpolate_weight)
+				update_real_world_with_world_state(ws_interpolated)
+				current_INB+=1
+				total_frame_interpolated +=1
+				total_frame_interpolated_5s +=1
+			else :
+				if gb.DBG_NET_PRINT_DEBUG: 
+					prints ("[CLI] F",current_INB+1, "no WSTATE, no more recent know, EXTRAPOLATE")
+				if gb.DBG_SW_CW_X_POLATE:
+					cw.prints (["[CLI] F",current_INB+1, "no WSTATE, no more recent know, EXTRAPOLATE"])
+				cli_extrapolate_objects(delta)
+				cli_ws_continuous_used_extrapolated +=1
+				current_INB+=1
+				total_frame_extrapolated +=1
+				total_frame_extrapolated_5s +=1
 		else :
 			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("F",current_INB+1, "has WSTATE")
+				prints ("[CLI] F",current_INB+1, "has WSTATE")
 			cli_ws_continuous_used_extrapolated = 0
 			total_frame_with_wstate +=1
 			total_frame_with_wstate_5s +=1
 			rotate_ws(current_INB+1)
-			update_real_world_with_world_state()
+			update_real_world_with_world_state(cli_ws_current)
 
 
 		if cli_ws_continuous_used_extrapolated>cli_ws_max_continuous_used_extrapolated:
@@ -137,11 +170,34 @@ func move_current_ws_to_previous_ws():
 				cli_ws_previous.erase(k)
 				
 
-func update_real_world_with_world_state () :
-	cli_ws_continuous_used_extrapolated = 0
-	var wstate = cli_ws_current
-	for tankID in wstate["tanks"]:
-		var tankVAL = wstate["tanks"][tankID]
+func create_interpolated_wstate (wstate_destination : Dictionary, interpol_weight : float) -> Dictionary:
+	
+	
+		########## Creation d'un WSTATE temporaire interpolé !
+		##### Parcours du WSTATE cible
+		#####   pour chaque objets trouvé (tank, etc.) :
+		#####     Interpolation entre objet réel et le WSTATE cible
+	var wstate_interpol = {}
+	wstate_interpol["Tanks"] = {}
+	for tankID in wstate_destination["Tanks"]:
+		var tankVAL = wstate_destination["Tanks"][tankID]
+		if not cli_players_tanks_nodes.has(tankID):
+#			add_player_tank (tankID, Vector2(tankVAL["PosX"],tankVAL["PosY"]), tankVAL["Rot"] )
+			pass
+		else:
+			wstate_interpol["Tanks"][tankID] = {}
+			if cli_players_tanks_nodes.has(tankID):
+				if tankID!= str(get_tree().get_network_unique_id()): # if it is another tank, let's move it
+					wstate_interpol["Tanks"][tankID]["PosX"] = cli_players_tanks_nodes[tankID].kinematic_node.position.linear_interpolate(Vector2(tankVAL["PosX"],tankVAL["PosY"]), interpol_weight).x
+					wstate_interpol["Tanks"][tankID]["PosY"] = cli_players_tanks_nodes[tankID].kinematic_node.position.linear_interpolate(Vector2(tankVAL["PosX"],tankVAL["PosY"]), interpol_weight).y
+					wstate_interpol["Tanks"][tankID]["Rot"] = lerp_angle(cli_players_tanks_nodes[tankID].kinematic_node.rotation , float (tankVAL["Rot"]), interpol_weight)
+					wstate_interpol["Tanks"][tankID]["Angle"] = lerp_angle (cli_players_tanks_nodes[tankID].angle, float (tankVAL["Angle"]), interpol_weight)
+					wstate_interpol["Tanks"][tankID]["Speed"] = lerp (cli_players_tanks_nodes[tankID].speed,float (tankVAL["Speed"]), interpol_weight)
+	return wstate_interpol
+
+func update_real_world_with_world_state (wstate : Dictionary) :
+	for tankID in wstate["Tanks"]:
+		var tankVAL = wstate["Tanks"][tankID]
 		if not cli_players_tanks_nodes.has(tankID):
 			add_player_tank (tankID, Vector2(tankVAL["PosX"],tankVAL["PosY"]), tankVAL["Rot"] )
 		else:
@@ -242,7 +298,7 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 			cw.prints(["[CLI] Late received World State, immediate sync to it", current_INB])
 			move_current_ws_to_previous_ws()
 			cli_ws_current = wstate
-			update_real_world_with_world_state()
+			update_real_world_with_world_state(cli_ws_current)
 		
 		if wstate["INB"]>current_INB:
 			if not cli_ws_nexts.has(wstate["INB"]):
@@ -254,13 +310,16 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 		if wstate["INB"] > current_INB+cli_ws_next_buffer_size:
 #			cw.prints(["[CLI] More than ", ws_max_delta, " ITS behind server (", cli_ws_current["INB"], "), hard resync to ", wstate["INB"]])
 #			while current_INB< wstate["INB"]-ws_max_delta:
-			if cli_ws_next_buffer_size<cli_ws_max_next_buffer_size and wstate["INB"] == current_INB+cli_ws_next_buffer_size + 1 :
+			if cli_ws_next_buffer_size<cli_ws_max_next_buffer_size and wstate["INB"] == current_INB+cli_ws_next_buffer_size + 1 and cli_ws_next_buffer_size_last_tick_upgrade+cli_ws_next_buffer_size_delay_upgrade>OS.get_ticks_msec():
 				cli_ws_next_buffer_size += 1
+				cli_ws_next_buffer_size_last_tick_upgrade = OS.get_ticks_ms()
 				cw.prints (["[CLI] Up cli_ws_next_buffer_size to :", cli_ws_next_buffer_size] )
 			else: 
-				rotate_ws(wstate["INB"])
+				var min_next_inb : int = cli_ws_nexts.keys().min()
+				rotate_ws(min_next_inb)
 				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[CLI] and force go to more recent INB :", current_INB )
+					prints ("[CLI] and force go to more recent INB :", min_next_inb )
+				cw.prints (["[CLI] and force go to more recent INB :", min_next_inb] )
 #			update_real_world_with_world_state()
 	
 #	if wstate["T"]>ST_last_received_wstate:
@@ -287,10 +346,21 @@ func _on_disconnected_from_server():
 
 func _5s_stat_reset():
 	total_frame_with_wstate_5s_array.append(total_frame_with_wstate_5s)
-	total_frame_without_wstate_5s_array.append(total_frame_without_wstate_5s)
+	total_frame_extrapolated_5s_array.append(total_frame_extrapolated_5s)
+	total_frame_interpolated_5s_array.append(total_frame_interpolated_5s)
+	
+	
 	if total_frame_with_wstate_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:   
 		total_frame_with_wstate_5s_array.pop_front()
-	if total_frame_without_wstate_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:
-		total_frame_without_wstate_5s_array.pop_front()		
+	if total_frame_extrapolated_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:
+		total_frame_extrapolated_5s_array.pop_front()		
+	if total_frame_interpolated_5s_array.size()>stats_5s_duration/stats_5s_refresh_delay:
+		total_frame_interpolated_5s_array.pop_front()		
+		
 	total_frame_with_wstate_5s = 0
-	total_frame_without_wstate_5s = 0
+	total_frame_extrapolated_5s = 0
+	total_frame_interpolated_5s = 0
+	
+	if current_INB_decreased :
+		total_INB_decreased += 1
+		current_INB_decreased = false

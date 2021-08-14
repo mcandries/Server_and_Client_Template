@@ -76,6 +76,7 @@ func _physics_process(delta):
 #		"konw keys :", srv_players_infos[peerKEY]["Inbs"].keys()
 		if gb.DBG_NET_PRINT_DEBUG: 
 			prints ("[SRV] SEEK CLIENT DATA", cli_inb, "last", srv_players_infos[peerKEY]["Inbs"].keys().max(), "FOR SRV INB", srv_INB, "Key Has it ? ", srv_players_infos[peerKEY]["Inbs"].has(cli_inb))
+		
 		if srv_players_infos[peerKEY]["Inbs"].has(cli_inb)  and not (Input.is_key_pressed(KEY_W)): #we got the data for the client
 			var tankVAL = srv_players_infos[peerKEY]["Inbs"][cli_inb]["Tank"] 
 			if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
@@ -98,6 +99,8 @@ func _physics_process(delta):
 				if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
 					if gb.DBG_NET_PRINT_DEBUG:
 						prints("[SRV] ... Interpolate player",peerKEY, "data")
+					if gb.DBG_SW_CW_X_POLATE:
+						cw.prints(["[SRV] ... Interpolate player",peerKEY, "data"])
 					var know_greater_VAL =  srv_players_infos[peerKEY]["Inbs"][found_greater]["Tank"]
 					var interpolate_weight = 1.0 / (found_greater - (cli_inb - 1) )
 					srv_players_tanks_nodes[peerKEY].kinematic_node.position = srv_players_tanks_nodes[peerKEY].kinematic_node.position.linear_interpolate(Vector2 (know_greater_VAL["PosX"], know_greater_VAL["PosY"]), interpolate_weight)
@@ -111,6 +114,8 @@ func _physics_process(delta):
 				if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
 					if gb.DBG_NET_PRINT_DEBUG:
 						prints("[SRV] ... Extrapolate player",peerKEY, "data")
+					if gb.DBG_SW_CW_X_POLATE:
+						cw.prints(["[SRV] ... Extrapolate player",peerKEY, "data"])
 					srv_players_tanks_nodes[peerKEY].physic_extrapolate(delta)
 
 	
@@ -138,9 +143,9 @@ func create_new_world_state(INB : int) -> Dictionary:
 		"ST"  : OS.get_ticks_msec(),
 		"INB" : INB,
 	}
-	wstate["tanks"] = {}
+	wstate["Tanks"] = {}
 	for tank in srv_players_tanks_nodes.values():
-		wstate["tanks"][tank.name] = {
+		wstate["Tanks"][tank.name] = {
 			"PosX": 	tank.kinematic_node.position.x,
 			"PosY": 	tank.kinematic_node.position.y,
 			"Rot" : 	tank.kinematic_node.rotation,
@@ -184,20 +189,22 @@ remote func S_RCV_player_position (msg):
 		var new_average_delta_inb : int = 0
 		for v in Delta_inb_last:
 			 new_average_delta_inb += v
-		new_average_delta_inb = round (new_average_delta_inb / float(Delta_inb_last.size()))
+		new_average_delta_inb = round (new_average_delta_inb / float(Delta_inb_last.size())) +1
 
 
 		if  (new_average_delta_inb < srv_players_infos[strPeerId]["Delta_inb"]) and srv_players_infos[strPeerId]["Delta_inb_last_up_tick"]+delta_inb_ms_from_last_up_before_down>OS.get_ticks_msec() :
 			#avoid to reduce the delta_INB if it had up in the previous X seconds
 			if gb.DBG_NET_PRINT_DEBUG:
 				prints("[SRV] Avoid reduce Delta_inb for peer", strPeerId, "from ", srv_players_infos[strPeerId]["Delta_inb"], "to",  new_average_delta_inb)			
+#			cw.prints(["[SRV] Avoid reduce Delta_inb for peer", strPeerId, "from ", srv_players_infos[strPeerId]["Delta_inb"], "to",  new_average_delta_inb])			
 		else :
-			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb)		
+			if srv_players_infos[strPeerId]["Delta_inb"]!=new_average_delta_inb :
+				if gb.DBG_NET_PRINT_DEBUG: 
+					prints ("[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb)		
+#				cw.prints (["[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb])		
 			if new_average_delta_inb>srv_players_infos[strPeerId]["Delta_inb"]:
 				srv_players_infos[strPeerId]["Delta_inb_last_up_tick"] = OS.get_ticks_msec()
 			srv_players_infos[strPeerId]["Delta_inb"] = new_average_delta_inb
-			srv_players_infos[strPeerId]["Delta_inb_avoid_reduce_by_one"] = 0
 		
 		srv_players_infos[strPeerId]["Inbs"][cli_INB] 					= {}
 		srv_players_infos[strPeerId]["Inbs"][cli_INB]["Tank"]			= {}
@@ -209,6 +216,6 @@ remote func S_RCV_player_position (msg):
 		srv_players_infos[strPeerId]["Inbs"][cli_INB]["Tank"]["Speed"] 	= msg["Speed"]
 		srv_players_infos[strPeerId]["Inbs"][cli_INB]["Tank"]["Speed_last_input_change"] 	= msg["Speed_last_input_change"]
 		
-		while srv_players_infos[strPeerId]["Inbs"][cli_INB].size() > srv_players_infos_history_size:
-			srv_players_infos[strPeerId]["Inbs"][cli_INB].erase (srv_players_infos[strPeerId]["Inbs"][cli_INB].keys().min())
+		while srv_players_infos[strPeerId]["Inbs"].size() > srv_players_infos_history_size:
+			srv_players_infos[strPeerId]["Inbs"].erase (srv_players_infos[strPeerId]["Inbs"].keys().min())
 		

@@ -86,37 +86,109 @@ size_flags_vertical = 0
 text = "-"
 valign = 1
 
-[node name="LabelPourcentWithoutWSTATE" type="Label" parent="HBox"]
+[node name="LabelPourcentExtra" type="Label" parent="HBox"]
 margin_left = 776.0
-margin_right = 1100.0
+margin_right = 992.0
 margin_bottom = 36.0
 size_flags_vertical = 0
-text = "Extrapol. client :"
+text = "Extr. cli. :"
 valign = 1
 
-[node name="PourcentWihoutWSTATE" type="Label" parent="HBox"]
-margin_left = 1104.0
-margin_right = 1204.0
+[node name="PourcentExtra" type="Label" parent="HBox"]
+margin_left = 996.0
+margin_right = 1076.0
 margin_bottom = 36.0
-rect_min_size = Vector2( 100, 0 )
+rect_min_size = Vector2( 80, 0 )
 size_flags_vertical = 0
 text = "-"
 align = 1
 valign = 1
 
-[node name="LabelPourcentWithoutWSTATE5SEC" type="Label" parent="HBox"]
-margin_left = 1208.0
-margin_right = 1586.0
+[node name="LabelPourcentExtra5SEC" type="Label" parent="HBox"]
+margin_left = 1080.0
+margin_right = 1350.0
 margin_bottom = 36.0
 size_flags_vertical = 0
-text = "Extrapol. client 5s :"
+text = "Extr. cli. 5s :"
 valign = 1
 
-[node name="PourcentWihoutWSTATE5SEC" type="Label" parent="HBox"]
-margin_left = 1590.0
-margin_right = 1690.0
+[node name="PourcentExtra5SEC" type="Label" parent="HBox"]
+margin_left = 1354.0
+margin_right = 1434.0
 margin_bottom = 36.0
-rect_min_size = Vector2( 100, 0 )
+rect_min_size = Vector2( 80, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
+valign = 1
+
+[node name="LabelPourcentInter" type="Label" parent="HBox"]
+margin_left = 1438.0
+margin_right = 1672.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "Inter. cli. :"
+valign = 1
+
+[node name="PourcentInter" type="Label" parent="HBox"]
+margin_left = 1676.0
+margin_right = 1756.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 80, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
+valign = 1
+
+[node name="LabelPourcentInter5SEC" type="Label" parent="HBox"]
+margin_left = 1760.0
+margin_right = 2048.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "Inter. cli. 5s :"
+valign = 1
+
+[node name="PourcentInter5SEC" type="Label" parent="HBox"]
+margin_left = 2052.0
+margin_right = 2132.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 80, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
+valign = 1
+
+[node name="LabelPourcentTMI" type="Label" parent="HBox"]
+margin_left = 2136.0
+margin_right = 2226.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "TMI :"
+valign = 1
+
+[node name="PourcentTMI" type="Label" parent="HBox"]
+margin_left = 2230.0
+margin_right = 2310.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 80, 0 )
+size_flags_vertical = 0
+text = "-"
+align = 1
+valign = 1
+
+[node name="LabelPourcentTMI5SEC" type="Label" parent="HBox"]
+margin_left = 2314.0
+margin_right = 2458.0
+margin_bottom = 36.0
+size_flags_vertical = 0
+text = "TMI 5s :"
+valign = 1
+
+[node name="PourcentTMI5SEC" type="Label" parent="HBox"]
+margin_left = 2462.0
+margin_right = 2542.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 80, 0 )
 size_flags_vertical = 0
 text = "-"
 align = 1
