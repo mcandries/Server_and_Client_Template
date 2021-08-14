@@ -6,7 +6,7 @@ var console_label_line_to_draw		= 12
 var console_history_cache_line_size	= 1500
 ###################################
 
-var Pconsole_Window 	= preload ("res://scenes/consoleWindow.tscn")
+#var Pconsole_Window 	= preload ("res://scenes/consoleWindow.tscn")
 var dbg_history 	: PoolStringArray	= []
 var console_window 	: HBoxContainer
 var console_label 	: Label
@@ -14,17 +14,13 @@ var console_vscroll : VScrollBar
 
 
 func _ready():
-	for n in get_tree().root.get_children():
-		if (n is Node2D) :
-			console_window = Pconsole_Window.instance()
-			n.add_child(console_window)
-			console_window.rect_position = Vector2 (10, gb.project_design_height - console_window.rect_min_size.y - 10 )
-			console_window.visible = console_initial_visibility
-			console_label 	= console_window.get_node("consoleLabel")
-			console_vscroll 	= console_window.get_node("consoleScrollBar")
-			console_vscroll.value = console_vscroll.max_value
-			self.print ( "Welcome to "+ ProjectSettings.get_setting("application/config/name")+" !")
-			break
+#	for n in get_tree().root.get_children():
+#		if (n is Node2D) :
+#			console_window = Pconsole_Window.instance()
+#			n.add_child(console_window)
+#	console_window.rect_position = Vector2 (10, gb.project_design_height - console_window.rect_min_size.y - 10 )
+#			break
+	pass
 
 func _input(event):
 	if Input.is_action_just_pressed("ui_switch_console_visibility"):
@@ -41,9 +37,9 @@ func print(value):
 	
 	while  dbg_history.size()>console_history_cache_line_size:
 		dbg_history.remove(0)
-		if (console_vscroll.value != console_vscroll.max_value) and console_vscroll.value>1:
-			console_vscroll.value -= 1
-
+		if is_instance_valid(console_vscroll) :
+			if (console_vscroll.value != console_vscroll.max_value) and console_vscroll.value>1:
+				console_vscroll.value -= 1
 	self.refresh()
 
 func prints(values : Array):

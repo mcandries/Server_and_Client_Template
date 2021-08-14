@@ -15,7 +15,7 @@ var angle := 0.0 			setget set_angle
 var vel   := Vector2.ZERO	setget set_vel
 onready var kinematic_node	: KinematicBody2D 	= $KinematicBody2D
 onready var smooth_node 	: Smooth2D		    = $C_VisualNode/Smooth2D
-
+onready var camera_node		: Camera2D			= $C_VisualNode/Smooth2D/Camera2D
 
 var front_angle	:= 0.0
 var	right_angle := +PI/2

@@ -13,7 +13,7 @@ var cli_ws_current	= {}
 var cli_ws_nexts	= {}
 #var ws_max_delta = 3  #max 3 TPS behind the server
 ########################################################
-var cli_ws_next_buffer_size = 1 + Engine.iterations_per_second/30
+var cli_ws_next_buffer_size = 2 + Engine.iterations_per_second/30
 ########################################################
 var cli_ws_buffer_loaded = false
 var cli_ws_continuous_used_extrapolated = 0
@@ -61,8 +61,6 @@ func _process(delta):
 
 func _physics_process(delta):
 
-	send_position_to_server()
-		
 	if cli_ws_buffer_loaded:
 		if not cli_ws_nexts.has(current_INB+1):
 			prints ("F",current_INB+1, "no WSTATE, EXTRAPOLATE")
@@ -88,6 +86,12 @@ func _physics_process(delta):
 			cw.prints (["Stop extrapolated (", cli_ws_continuous_used_extrapolated, "/",cli_ws_max_continuous_used_extrapolated, ") !"])
 			cli_ws_continuous_used_extrapolated = 0
 			return  #### We Stop interpolated and Hard Resync with server
+
+	### We do here by ourself the player tank _physic_process to update the postion before sending it
+	if my_tank:
+		my_tank._physics_process(delta)
+
+	send_position_to_server(current_INB)
 
 func _input(event):
 	if Input.is_action_just_pressed("ui_cancel"):
@@ -166,16 +170,21 @@ func add_player_tank (tankID : String, position : Vector2, rot : float):
 	var tank : CTank = Tank.instance()
 	cli_players_tanks_nodes[tankID] = tank
 	tank.name = tankID
+	cli_levelscene.get_node("Tanks").add_child(tank, true)		
+	tank.init_position(position, rot)
 	if tankID == str(get_tree().get_network_unique_id()):
 		tank.cli_owner = true
 		my_tank = tank
-	cli_levelscene.get_node("Tanks").add_child(tank, true)		
-	tank.init_position(position, rot)
+		my_tank.camera_node.current = true
+		srvtree_manager.srv_tree_current_cam = my_tank.camera_node
+		my_tank.set_physics_process(false) #### We do it by ourself in the _physic_process of this cli engine !
 
 
-func send_position_to_server():
+
+func send_position_to_server(INB):
 	if is_instance_valid(my_tank):
 		var msg = {
+			"INB"	: INB,
 			"PosX" 	: my_tank.kinematic_node.position.x,
 			"PosY" 	: my_tank.kinematic_node.position.y,
 			"Rot"  	: my_tank.kinematic_node.rotation,

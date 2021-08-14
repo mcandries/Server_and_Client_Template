@@ -21,6 +21,12 @@ target = NodePath("../../KinematicBody2D")
 scale = Vector2( 2, 3 )
 texture = ExtResource( 1 )
 
+[node name="Camera2D" type="Camera2D" parent="C_VisualNode/Smooth2D"]
+limit_smoothed = true
+smoothing_enabled = true
+editor_draw_limits = true
+editor_draw_drag_margin = true
+
 [node name="KinematicBody2D" type="KinematicBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="KinematicBody2D"]

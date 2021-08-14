@@ -7,9 +7,13 @@ var srv_levelscene : Node2D
 
 var srv_players_tanks_last_infos =  {
 	"peerId" : {
-		"PosX" : 0,
-		"PosY" : 0,
-		"Rot"  : 0
+		"INB"  : 0,
+		"PosX" : 0.0,
+		"PosY" : 0.0,
+		"Rot"  : 0.0,
+		"Angle": 0.0,
+		"Speed": 0.0
+		
 	}
 }
 var srv_players_tanks_nodes = {}
@@ -20,6 +24,8 @@ const srv_nb_ws = 3
 var srv_ws_older_index = 0
 var srv_ws_previous_index = 1
 var srv_ws_current_index = 2
+
+var srv_INB := 0
 
 func _ready_level(level):
 	srv_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
@@ -43,6 +49,8 @@ func _process(delta):
 
 func _physics_process(delta):
 	
+	srv_INB = Engine.get_physics_frames()
+	
 	#make tank move on server as on each client
 	for tankKEY in srv_players_tanks_last_infos:
 		var tankVAL = srv_players_tanks_last_infos[tankKEY]
@@ -53,7 +61,7 @@ func _physics_process(delta):
 			srv_players_tanks_nodes[tankKEY].speed = tankVAL["Speed"]
 	
 	#create a new world state
-	var wstate = create_new_world_state()
+	var wstate = create_new_world_state(srv_INB)
 	world_states.append(wstate)
 	if world_states.size()>srv_nb_ws:
 		world_states.pop_front()
@@ -78,10 +86,10 @@ func add_tank (tankID : String, position : Vector2, rot : float) -> CTank:
 	}
 	return tank
 
-func create_new_world_state() -> Dictionary:
+func create_new_world_state(INB : int) -> Dictionary:
 	var wstate = {
 		"ST"  : OS.get_ticks_msec(),
-		"INB" : Engine.get_physics_frames(),
+		"INB" : INB,
 	}
 	wstate["tanks"] = {}
 	for tank in srv_players_tanks_nodes.values():
@@ -110,6 +118,7 @@ func send_world_state_to_clients():
 remote func S_RCV_player_position (msg):
 	var strPeerId = str(get_tree().get_rpc_sender_id())
 	if srv_players_tanks_last_infos.has(strPeerId):
+		srv_players_tanks_last_infos[strPeerId]["INB"] 		= msg["INB"]
 		srv_players_tanks_last_infos[strPeerId]["PosX"] 	= msg["PosX"]
 		srv_players_tanks_last_infos[strPeerId]["PosY"] 	= msg["PosY"]
 		srv_players_tanks_last_infos[strPeerId]["Rot"] 		= msg["Rot"]
