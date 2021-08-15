@@ -1,6 +1,8 @@
 class_name Srv_Network_Manager
 extends Node
 
+signal player_left
+
 ################################### Settings
 var maxPlayer = 12
 var upnp_enable = true
@@ -146,11 +148,14 @@ func _Peer_Disconnected (peerId):
 				if p != peerId:
 					players_infos["game_owner_peerid"] = p
 					break
-						
+
+	emit_signal("player_left", peerId)
 	players_list.erase(peerId) 
 	players_infos_updated()
 	cw.print("[SRV] Player disconnected ("+str(peerId) +")")
 
+	
+	
 func _on_latencyTimer_timeout():
 #	cw.prints(["srv ask", get_tree().get_frame()])
 	rpc_unreliable ("C_EMT_ping", OS.get_ticks_msec()) #call on all connected peer

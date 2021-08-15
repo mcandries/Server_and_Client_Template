@@ -38,8 +38,10 @@ const srv_nb_ws = 3
 var srv_INB : int = 0
 
 func _ready_level(level):
-	srv_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
 	
+	
+	srv_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
+		
 	srv_players_infos = {}
 	srv_players_tanks_nodes = {}
 
@@ -54,9 +56,9 @@ func _ready_level(level):
 		srv_players_infos[str (p)]["Delta_inb_last"] = []
 		srv_players_infos[str (p)]["Delta_inb_last_up_tick"] = 0
 		srv_players_infos[str (p)]["Inbs"] = {}
-		
-		
 		j+=1
+
+	gb.srv_network_manager.connect("player_left", self, "_on_player_left")
 
 	rpc ("C_RCV_ready_level", level)
 
@@ -120,12 +122,18 @@ func _input(event):
 
 func add_tank (tankID : String, position : Vector2, rot : float) -> CTank:
 	var tank : CTank = Tank.instance()
-	tank.name = str (tankID)
+	tank.name = tankID
 	srv_levelscene.get_node("Tanks").add_child(tank, true)
 	tank.init_position (position, rot)	
 	tank.server_mode = true
-	srv_players_tanks_nodes[str (tankID)] = tank
+	srv_players_tanks_nodes[tankID] = tank
 	return tank
+
+
+func delete_tank (tankID : String):
+	srv_players_tanks_nodes[tankID].queue_free()
+	srv_players_tanks_nodes.erase (tankID)
+	
 
 func create_new_world_state(INB : int) -> Dictionary:
 	var wstate = {
@@ -203,3 +211,14 @@ remote func S_RCV_player_position (msg):
 		while srv_players_infos[strPeerId]["Inbs"].size() > srv_players_infos_history_size:
 			srv_players_infos[strPeerId]["Inbs"].erase (srv_players_infos[strPeerId]["Inbs"].keys().min())
 		
+
+###
+### Signals
+###
+
+func _on_player_left (peerID):
+	var strPeerId = str (peerID)
+	delete_tank(strPeerId)
+	srv_players_infos.erase(strPeerId)
+	
+	

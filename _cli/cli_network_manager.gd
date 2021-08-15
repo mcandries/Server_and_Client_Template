@@ -87,9 +87,10 @@ func start_network_client (ip :="127.0.0.1", port := 12121, playername := "playe
 
 
 func DisconnectFromServer():
-	cli_unload_level()
-	cliLatencyTimer.queue_free()
 	cw.print("Close Network client connection")
+	cli_unload_level()
+	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
+	cliLatencyTimer.queue_free()
 	networkENet = null
 	get_tree().network_peer = null
 

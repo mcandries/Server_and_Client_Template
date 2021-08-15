@@ -2,8 +2,6 @@ class_name Cli_Game_Engine
 extends CPreloader
 
 
-onready var tank_root_node = get_node ("Level/Tanks")
-
 var cli_levelscene : Node2D
 
 var current_INB = 0
@@ -38,6 +36,7 @@ var total_frame_interpolated_5s_array := []
 var total_INB_decreased := 0
 const stats_5s_duration := 5.0
 const stats_5s_refresh_delay := 0.2
+var timer_5s : Timer
 
 var ST_last_received_wstate : int = 0
 
@@ -61,12 +60,13 @@ func _ready_level(level):
 	
 	cli_levelscene = get_node ("/root/RootScene/ActiveScene/"+level)
 	gb.cli_network_manager.connect("disconnected_from_server",self, "_on_disconnected_from_server")
-	var t = Timer.new()
-	t.one_shot = false
-	t.wait_time = stats_5s_refresh_delay
-	self.add_child(t)
-	t.connect("timeout",self, "_5s_stat_reset")
-	t.start()
+	gb.cli_network_manager.connect("",self, "")
+	timer_5s = Timer.new()
+	timer_5s.one_shot = false
+	timer_5s.wait_time = stats_5s_refresh_delay
+	self.add_child(timer_5s)
+	timer_5s.connect("timeout",self, "_5s_stat_reset")
+	timer_5s.start()
 
 func _process(delta):
 	pass
@@ -134,6 +134,7 @@ func _input(event):
 
 
 func _exit_tree():
+	timer_5s.queue_free()
 	gb.cli_game_engine = null
 
 func rotate_ws(to : int):
@@ -188,6 +189,12 @@ func create_interpolated_wstate (wstate_destination : Dictionary, interpol_weigh
 	return wstate_interpol
 
 func update_real_world_with_world_state (wstate : Dictionary) :
+	
+	#remove deleted tank on server
+	for tankID in cli_players_tanks_nodes:
+		if not tankID in wstate["Tanks"]:
+			delete_player_tank (tankID)
+	
 	for tankID in wstate["Tanks"]:
 		var tankVAL = wstate["Tanks"][tankID]
 		if not cli_players_tanks_nodes.has(tankID):
@@ -204,6 +211,7 @@ func update_real_world_with_world_state (wstate : Dictionary) :
 					# TO-DO
 						#si extrapolation, on resync sur l'extrapolation locale ou on laisse comme on est ?
 						pass
+	
 
 
 func cli_extrapolate_objects(delta):
@@ -234,6 +242,10 @@ func add_player_tank (tankID : String, position : Vector2, rot : float):
 		srvtree_manager.srv_tree_current_cam = my_tank.camera_node
 		my_tank.set_physics_process(false) #### We do it by ourself in the _physic_process of this cli engine !
 
+func delete_player_tank (tankID : String):
+	cli_players_tanks_nodes[tankID].queue_free()
+	cli_players_tanks_nodes.erase(tankID)
+	cw.prints(["[CLI] remove cli tank node because not anymore in WSTATE"])
 
 
 func send_position_to_server(INB):
@@ -325,8 +337,9 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 
 
 func _on_disconnected_from_server():
-	gb.cli_network_manager.cli_unload_level()
-	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
+	pass
+#	gb.cli_network_manager.cli_unload_level()
+#	utils.change_scene(get_tree(), cm.basics_scenes_list["menu"])
 
 func _5s_stat_reset():
 	total_frame_with_wstate_5s_array.append(total_frame_with_wstate_5s)
