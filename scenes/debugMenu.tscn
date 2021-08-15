@@ -1,0 +1,120 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://ressources/fonts/DebugMenu_Fonts.tres" type="DynamicFont" id=1]
+[ext_resource path="res://scenes/debugMenu.gd" type="Script" id=2]
+
+[node name="DebugMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 3840, 2160 )
+mouse_filter = 2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CC" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="PanelContainer" parent="CC"]
+margin_left = 1654.0
+margin_top = 907.0
+margin_right = 2186.0
+margin_bottom = 1253.0
+
+[node name="HB" type="HBoxContainer" parent="CC/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 525.0
+margin_bottom = 339.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VB1" type="VBoxContainer" parent="CC/PanelContainer/HB"]
+margin_right = 510.0
+margin_bottom = 332.0
+
+[node name="DBG_CW_X_POLATE" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_right = 510.0
+margin_bottom = 44.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_CW_X_POLATE"
+
+[node name="DBG_CW_INB" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 48.0
+margin_right = 510.0
+margin_bottom = 92.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_CW_INB"
+
+[node name="DBG_CW_WSTATE" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 96.0
+margin_right = 510.0
+margin_bottom = 140.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_CW_WSTATE"
+
+[node name="DBG_CW_DATA_CLI" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 144.0
+margin_right = 510.0
+margin_bottom = 188.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_CW_DATA_CLI"
+
+[node name="DBG_NET_PRINT_DEBUG" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 192.0
+margin_right = 510.0
+margin_bottom = 236.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_NET_PRINT_DEBUG"
+
+[node name="DBG_DRAW_TANK_4_VECTORS" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 240.0
+margin_right = 510.0
+margin_bottom = 284.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_DRAW_TANK_4_VECTORS"
+
+[node name="DBG_DRAW_TANK_ANGLE" type="CheckButton" parent="CC/PanelContainer/HB/VB1"]
+margin_top = 288.0
+margin_right = 510.0
+margin_bottom = 332.0
+custom_fonts/font = ExtResource( 1 )
+custom_constants/check_vadjust = 0
+custom_constants/hseparation = 20
+text = "DBG_DRAW_TANK_ANGLE"
+
+[node name="VB2" type="VBoxContainer" parent="CC/PanelContainer/HB"]
+margin_left = 514.0
+margin_right = 514.0
+margin_bottom = 332.0
+
+[node name="VB3" type="VBoxContainer" parent="CC/PanelContainer/HB"]
+margin_left = 518.0
+margin_right = 518.0
+margin_bottom = 332.0
+
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_CW_X_POLATE" to="." method="_on_DBG_CW_X_POLATE_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_CW_INB" to="." method="_on_DBG_CW_INB_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_CW_WSTATE" to="." method="_on_DBG_CW_WSTATE_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_CW_DATA_CLI" to="." method="_on_DBG_CW_DATA_CLI_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_NET_PRINT_DEBUG" to="." method="_on_DBG_NET_PRINT_DEBUG_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_DRAW_TANK_4_VECTORS" to="." method="_on_DBG_DRAW_TANK_4_VECTORS_toggled"]
+[connection signal="toggled" from="CC/PanelContainer/HB/VB1/DBG_DRAW_TANK_ANGLE" to="." method="_on_DBG_DRAW_TANK_ANGLE_toggled"]

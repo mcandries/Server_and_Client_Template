@@ -27,3 +27,5 @@ func _input(event):
 					yield(get_tree().create_timer(0.25),"timeout")
 					gb.cli_network_manager.set_ready (true)
 					gb.cli_network_manager.launch_game()
+					
+					

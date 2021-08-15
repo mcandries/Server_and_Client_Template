@@ -74,9 +74,7 @@ func _physics_process(delta):
 		var totote = str(cli_inb)
 		var toto2 = srv_players_infos[peerKEY]["Inbs"].keys().has(cli_inb)
 #		"konw keys :", srv_players_infos[peerKEY]["Inbs"].keys()
-		if gb.DBG_NET_PRINT_DEBUG: 
-			prints ("[SRV] SEEK CLIENT DATA", cli_inb, "last", srv_players_infos[peerKEY]["Inbs"].keys().max(), "FOR SRV INB", srv_INB, "Key Has it ? ", srv_players_infos[peerKEY]["Inbs"].has(cli_inb))
-		
+	
 		if srv_players_infos[peerKEY]["Inbs"].has(cli_inb)  and not (Input.is_key_pressed(KEY_W)): #we got the data for the client
 			var tankVAL = srv_players_infos[peerKEY]["Inbs"][cli_inb]["Tank"] 
 			if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
@@ -86,21 +84,15 @@ func _physics_process(delta):
 				srv_players_tanks_nodes[peerKEY].angle_last_input_change = tankVAL["Angle_last_input_change"]
 				srv_players_tanks_nodes[peerKEY].speed = tankVAL["Speed"]
 				srv_players_tanks_nodes[peerKEY].speed_last_input_change = tankVAL["Speed_last_input_change"]
-
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[SRV] Ok got client", peerKEY ," data or this INB")
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_DATA_CLI, ["[SRV] Ok got client", peerKEY ," data or this INB"])
 		else:
-			if gb.DBG_NET_PRINT_DEBUG:
-				prints ("[SRV] Missing client data, search for a solution...")
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_DATA_CLI, ["[SRV] Missing client data, search for a solution..."])
 			
 			var found_greater = utils.array_find_first_greater_than (srv_players_infos[peerKEY]["Inbs"].keys(), cli_inb )
 			
 			if found_greater and found_greater-cli_inb < srv_interpolate_inb_limit: #we know a more recent client DATA, so let's interpolate
 				if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
-					if gb.DBG_NET_PRINT_DEBUG:
-						prints("[SRV] ... Interpolate player",peerKEY, "data")
-					if gb.DBG_SW_CW_X_POLATE:
-						cw.prints(["[SRV] ... Interpolate player",peerKEY, "data"])
+					utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_X_POLATE,["[SRV] ... Interpolate player",peerKEY, "data"])
 					var know_greater_VAL =  srv_players_infos[peerKEY]["Inbs"][found_greater]["Tank"]
 					var interpolate_weight = 1.0 / (found_greater - (cli_inb - 1) )
 					srv_players_tanks_nodes[peerKEY].kinematic_node.position = srv_players_tanks_nodes[peerKEY].kinematic_node.position.linear_interpolate(Vector2 (know_greater_VAL["PosX"], know_greater_VAL["PosY"]), interpolate_weight)
@@ -112,10 +104,7 @@ func _physics_process(delta):
 		
 			else : #no data at all, let's extrapolate !
 				if is_instance_valid(srv_players_tanks_nodes[peerKEY]):
-					if gb.DBG_NET_PRINT_DEBUG:
-						prints("[SRV] ... Extrapolate player",peerKEY, "data")
-					if gb.DBG_SW_CW_X_POLATE:
-						cw.prints(["[SRV] ... Extrapolate player",peerKEY, "data"])
+					utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_X_POLATE,["[SRV] ... Extrapolate player",peerKEY, "data"])
 					srv_players_tanks_nodes[peerKEY].physic_extrapolate(delta)
 
 	
@@ -152,8 +141,7 @@ func create_new_world_state(INB : int) -> Dictionary:
 			"Angle" : 	tank.angle,
 			"Speed" : 	tank.speed,
 			}
-	if gb.DBG_NET_PRINT_DEBUG: 
-		prints ("[SRV] Create new WSTATE", wstate["INB"] )
+	utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[SRV] Create new WSTATE", wstate["INB"]] )
 	return wstate
 
 
@@ -167,8 +155,7 @@ func send_world_state_to_clients():
 	var i = world_states.size()-1
 	rpc_unreliable("C_RCV_world_state", world_states[i])
 #	rpc("C_RCV_world_state", world_states[i])
-	if gb.DBG_NET_PRINT_DEBUG: 
-		prints ("[SRV] Push new WSTATE to clients", world_states[i]["INB"] )
+	utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[SRV] Push new WSTATE to clients", world_states[i]["INB"]] )
 	
 
 remote func S_RCV_player_position (msg):
@@ -178,8 +165,7 @@ remote func S_RCV_player_position (msg):
 		#function _update_peer_delta_inb
 		var cli_INB = msg["INB"]
 		var tmp_delta_INB = 1 + (srv_INB - cli_INB)  #2 because 2
-		if gb.DBG_NET_PRINT_DEBUG: 
-			prints ("[SRV] received player_position with cli INB", cli_INB, "server INB", srv_INB, "delta INB :", tmp_delta_INB)		
+		utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_DATA_CLI, ["[SRV] received player_position with cli INB", cli_INB, "server INB", srv_INB, "delta INB :", tmp_delta_INB])		
 
 		var Delta_inb_last : Array = srv_players_infos[strPeerId]["Delta_inb_last"]
 		Delta_inb_last.append (tmp_delta_INB)
@@ -194,13 +180,11 @@ remote func S_RCV_player_position (msg):
 
 		if  (new_average_delta_inb < srv_players_infos[strPeerId]["Delta_inb"]) and srv_players_infos[strPeerId]["Delta_inb_last_up_tick"]+delta_inb_ms_from_last_up_before_down>OS.get_ticks_msec() :
 			#avoid to reduce the delta_INB if it had up in the previous X seconds
-			if gb.DBG_NET_PRINT_DEBUG:
-				prints("[SRV] Avoid reduce Delta_inb for peer", strPeerId, "from ", srv_players_infos[strPeerId]["Delta_inb"], "to",  new_average_delta_inb)			
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_DATA_CLI, ["[SRV] Avoid reduce Delta_inb for peer", strPeerId, "from ", srv_players_infos[strPeerId]["Delta_inb"], "to",  new_average_delta_inb])
 #			cw.prints(["[SRV] Avoid reduce Delta_inb for peer", strPeerId, "from ", srv_players_infos[strPeerId]["Delta_inb"], "to",  new_average_delta_inb])			
 		else :
 			if srv_players_infos[strPeerId]["Delta_inb"]!=new_average_delta_inb :
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb)		
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_DATA_CLI, ["[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb])		
 #				cw.prints (["[SRV] set peer", strPeerId, "Delta_INB from", srv_players_infos[strPeerId]["Delta_inb"], " to", new_average_delta_inb])		
 			if new_average_delta_inb>srv_players_infos[strPeerId]["Delta_inb"]:
 				srv_players_infos[strPeerId]["Delta_inb_last_up_tick"] = OS.get_ticks_msec()

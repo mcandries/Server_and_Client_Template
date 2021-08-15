@@ -22,3 +22,13 @@ static func array_find_first_greater_than (arr : Array, value) :
 			if v>value:
 				return v 
 	return false
+
+
+static func prt_cw (stdout : bool, console : bool, values : Array):
+	if stdout:
+		var _str : String = ""
+		for v in values:
+			_str += str(v) + " "
+		print (_str)
+	if console:
+		cw.prints(values)

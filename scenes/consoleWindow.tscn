@@ -4,17 +4,30 @@
 [ext_resource path="res://ressources/fonts/ConsoleWindow_Fonts.tres" type="DynamicFont" id=2]
 [ext_resource path="res://scenes/consoleWindow.gd" type="Script" id=3]
 
-[node name="HBoxContainer" type="HBoxContainer"]
-modulate = Color( 1, 1, 1, 0.501961 )
-rect_min_size = Vector2( 1200, 512 )
-size_flags_horizontal = 0
-size_flags_vertical = 0
+[node name="ConsoleWindow" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 3840, 2160 )
+mouse_filter = 2
 script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="consoleLabel" type="Label" parent="."]
+[node name="HB" type="HBoxContainer" parent="."]
+modulate = Color( 1, 1, 1, 0.501961 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_top = -512.0
+margin_right = 1200.0
+rect_min_size = Vector2( 1200, 512 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="consoleLabel" type="Label" parent="HB"]
 margin_right = 1180.0
 margin_bottom = 512.0
 rect_min_size = Vector2( 1024, 512 )
@@ -33,10 +46,10 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="consoleScrollBar" type="VScrollBar" parent="."]
+[node name="consoleScrollBar" type="VScrollBar" parent="HB"]
 margin_left = 1184.0
 margin_right = 1200.0
 margin_bottom = 512.0
 rect_min_size = Vector2( 16, 0 )
 
-[connection signal="scrolling" from="consoleScrollBar" to="." method="_on_consoleScrollBar_scrolling"]
+[connection signal="scrolling" from="HB/consoleScrollBar" to="HB" method="_on_consoleScrollBar_scrolling"]

@@ -57,24 +57,14 @@ func _physics_process(delta):
 			self.angle += angle_last_input_change
 			speed_last_input_change = (Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")) * 1500*delta
 			self.speed += speed_last_input_change
-
-#			self.speed = lerp (speed,0.0,0.04)
 			move_it(delta)
 		
 
 
 func physic_extrapolate(delta):
-#	cw.prints(["angle", angle_previous, angle])
-#	self.angle = angle + (angle-angle_previous)
 	angle = angle + angle_last_input_change
-#	cw.prints(["extrapoled angle : ", angle])
-	
-#	cw.prints(["speed", speed_previous, speed ])
-#	self.speed = speed + (speed-speed_previous)
 	speed = speed + speed_last_input_change
-#	cw.prints(["extrapoled speed", speed])
 	move_it(delta)
-	
 
 func move_it(delta):
 	kinematic_node.rotation = lerp_angle(kinematic_node.rotation,angle, 0.2)
@@ -82,9 +72,6 @@ func move_it(delta):
 	speed = lerp (speed,0.0,0.04)
 
 	vel = Vector2(0,-speed).rotated(kinematic_node.rotation)*delta
-#	prints ("avant move and slide",  vel, speed)
-	
-#	vel = kinematic_node.move_and_slide(vel)
 
 	var prev_vel : Vector2
 	var new_vel : Vector2 = vel
@@ -148,9 +135,7 @@ func init_position(position : Vector2, rot : float):
 	kinematic_node.rotation = rot
 	smooth_node.rotation = rot
 	angle = rot
-#	angle_previous = angle
 	speed = 0
-#	speed_previous = 0
 	vel = Vector2.ZERO
 	smooth_node.teleport()
 	_update_4_angles()

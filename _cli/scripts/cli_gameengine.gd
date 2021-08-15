@@ -14,8 +14,8 @@ var cli_ws_nexts	= {}
 #var ws_max_delta = 3  #max 3 TPS behind the server
 ########################################################
 var cli_ws_next_buffer_size = (Engine.iterations_per_second/30) #+ 2  #### SHOULD WE DEFINE THE BUFFER SIZE DEPENDING ON WS CACHE MISSING ???
-var cli_ws_max_next_buffer_size = (Engine.iterations_per_second/10) # ~100ms of buffer max
-var cli_ws_next_buffer_size_delay_upgrade := 300 #delay in ms before allowing to up buffer size of one
+var cli_ws_max_next_buffer_size = (Engine.iterations_per_second/12) # ~80ms of buffer max [to deal with no data at all to up to 80ms]
+var cli_ws_next_buffer_size_delay_upgrade := 80 #delay in ms before allowing to up buffer size of one
 var cli_ws_next_buffer_size_last_tick_upgrade := 0
 ########################################################
 var current_INB_decreased = false
@@ -78,19 +78,14 @@ func _physics_process(delta):
 			#75% of last 200ms are extrapolated ? We back current_INB of 1
 			current_INB -=1
 			current_INB_decreased = true
-			if gb.DBG_NET_PRINT_DEBUG:
-					prints("[CLI] Reduce current_INB of 1 (Next is ",current_INB+1,")")
-			cw.prints(["[CLI] Reduce current_INB of 1 (Next is",current_INB+1,")"])
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_INB, ["[CLI] Reduce current_INB of 1 (Next is ",current_INB+1,")"])
 			
 		if not cli_ws_nexts.has(current_INB+1):
 
 			var found_greater = utils.array_find_first_greater_than (cli_ws_nexts.keys(), current_INB+1 )
 			
 			if found_greater :
-				if gb.DBG_NET_PRINT_DEBUG:
-					prints("[CLI] F",current_INB+1, "no WSTATE, but a recent one is know, Interpolate world state")
-				if gb.DBG_SW_CW_X_POLATE:
-					cw.prints(["[CLI] F",current_INB+1, "no WSTATE, but a recent one is know, Interpolate world state"])
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_X_POLATE,["[CLI] F",current_INB+1, "no WSTATE, but a recent one is know, Interpolate world state"])
 				var interpolate_weight = 1.0 / (found_greater - (current_INB +1 -1 ))
 				var ws_interpolated = create_interpolated_wstate(cli_ws_nexts[found_greater], interpolate_weight)
 				update_real_world_with_world_state(ws_interpolated)
@@ -98,10 +93,7 @@ func _physics_process(delta):
 				total_frame_interpolated +=1
 				total_frame_interpolated_5s +=1
 			else :
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[CLI] F",current_INB+1, "no WSTATE, no more recent know, EXTRAPOLATE")
-				if gb.DBG_SW_CW_X_POLATE:
-					cw.prints (["[CLI] F",current_INB+1, "no WSTATE, no more recent know, EXTRAPOLATE"])
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_X_POLATE,["[CLI] F",current_INB+1, "no WSTATE, no more recent know, EXTRAPOLATE"])
 				cli_extrapolate_objects(delta)
 				cli_ws_continuous_used_extrapolated +=1
 				current_INB+=1
@@ -122,7 +114,7 @@ func _physics_process(delta):
 			cli_ws_previous = {}
 			cli_ws_current	= {}
 			cli_ws_nexts	= {}
-			cw.prints (["Stop extrapolated (", cli_ws_continuous_used_extrapolated, "/",cli_ws_max_continuous_used_extrapolated, ") !"])
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_X_POLATE,["Stop extrapolated (", cli_ws_continuous_used_extrapolated, "/",cli_ws_max_continuous_used_extrapolated, ") !"])
 			cli_ws_continuous_used_extrapolated = 0
 			return  #### We Stop interpolated and Hard Resync with server
 
@@ -266,36 +258,31 @@ puppet func C_RCV_ready_level (level):
 
 puppet func C_RCV_world_state (wstate : Dictionary):
 	
-	if gb.DBG_NET_PRINT_DEBUG: 
-		prints ("[CLI] Received world", wstate["INB"],"...")
-
+	utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] Received world", wstate["INB"],"..."])
+		
 	wstate["CT"] = OS.get_ticks_msec()
 	wstate["INB"] = int (wstate["INB"])
 
 	if not cli_ws_buffer_loaded : #init phase
 		if cli_ws_current.empty() :
 			cli_ws_current = wstate
-			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("[CLI] ... and PREPARE BUFFER by push it in current")
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] ... and PREPARE BUFFER by push it in current"])
 		else :
 			cli_ws_nexts [wstate["INB"]] = wstate
-			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("[CLI] ... and PREPARE BUFFER by push it in next")
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] ... and PREPARE BUFFER by push it in next"])
 			if cli_ws_nexts.size()>= cli_ws_next_buffer_size:
 				var taller_INB = cli_ws_nexts.keys().max()
 				current_INB = taller_INB - cli_ws_next_buffer_size
 #				current_INB = cli_ws_current ["INB"]
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[CLI] Init INB to", current_INB)
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_INB, ["[CLI] Init INB to", current_INB])
 				cli_ws_buffer_loaded = true
 	else :
 		if wstate["INB"]<current_INB :
-			if gb.DBG_NET_PRINT_DEBUG: 
-				prints ("[CLI] ... and ignore it ! (too old)", wstate["INB"],"<",current_INB)
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] ... and ignore it ! (too old)", wstate["INB"],"<",current_INB])
 			return
 		
 		if  wstate["INB"] == current_INB:
-			cw.prints(["[CLI] Late received World State, immediate sync to it", current_INB])
+			utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] Late received World State, immediate sync to it", current_INB])
 			move_current_ws_to_previous_ws()
 			cli_ws_current = wstate
 			update_real_world_with_world_state(cli_ws_current)
@@ -303,23 +290,20 @@ puppet func C_RCV_world_state (wstate : Dictionary):
 		if wstate["INB"]>current_INB:
 			if not cli_ws_nexts.has(wstate["INB"]):
 				cli_ws_nexts[wstate["INB"]] = wstate
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[CLI] ... and add it to NEXT", wstate["INB"] )
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_WSTATE, ["[CLI] ... and add it to NEXT", wstate["INB"]])
 		
-		#if the client goes too far late, need to hard resync it
+		#if the client goes too far late (we received wstate far more recent than our local current INB + buufer_size)
 		if wstate["INB"] > current_INB+cli_ws_next_buffer_size:
 #			cw.prints(["[CLI] More than ", ws_max_delta, " ITS behind server (", cli_ws_current["INB"], "), hard resync to ", wstate["INB"]])
 #			while current_INB< wstate["INB"]-ws_max_delta:
 			if cli_ws_next_buffer_size<cli_ws_max_next_buffer_size and wstate["INB"] == current_INB+cli_ws_next_buffer_size + 1 and cli_ws_next_buffer_size_last_tick_upgrade+cli_ws_next_buffer_size_delay_upgrade>OS.get_ticks_msec():
 				cli_ws_next_buffer_size += 1
 				cli_ws_next_buffer_size_last_tick_upgrade = OS.get_ticks_ms()
-				cw.prints (["[CLI] Up cli_ws_next_buffer_size to :", cli_ws_next_buffer_size] )
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_INB, ["[CLI] Up cli_ws_next_buffer_size to :", cli_ws_next_buffer_size] )
 			else: 
 				var min_next_inb : int = cli_ws_nexts.keys().min()
 				rotate_ws(min_next_inb)
-				if gb.DBG_NET_PRINT_DEBUG: 
-					prints ("[CLI] and force go to more recent INB :", min_next_inb )
-				cw.prints (["[CLI] and force go to more recent INB :", min_next_inb] )
+				utils.prt_cw (gb.DBG_NET_PRINT_DEBUG, gb.DBG_CW_INB, ["[CLI] Force teleport to a more recent INB :", min_next_inb] )
 #			update_real_world_with_world_state()
 	
 #	if wstate["T"]>ST_last_received_wstate:

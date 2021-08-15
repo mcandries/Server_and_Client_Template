@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://_cli/cli_network_manager.gd" type="Script" id=1]
 [ext_resource path="res://_cli/cli_root_scene.gd" type="Script" id=2]
 [ext_resource path="res://scenes/perfMonitor.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/consoleWindow.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/debugMenu.tscn" type="PackedScene" id=5]
 
 [node name="RootScene" type="Node2D"]
 script = ExtResource( 2 )
@@ -24,8 +25,7 @@ layer = 100
 
 [node name="PerfMonitor" parent="GUI" instance=ExtResource( 3 )]
 
-[node name="ConsoleWindows" parent="GUI" instance=ExtResource( 4 )]
-margin_left = 12.3132
-margin_top = 1633.08
-margin_right = 1212.31
-margin_bottom = 2145.08
+[node name="DebugMenu" parent="GUI" instance=ExtResource( 5 )]
+visible = false
+
+[node name="ConsoleWindow" parent="GUI" instance=ExtResource( 4 )]

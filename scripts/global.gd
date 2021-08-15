@@ -8,10 +8,13 @@ var project_design_height : int = ProjectSettings.get_setting("display/window/si
 
 var cli_game_engine : Cli_Game_Engine
 
-const DBG_SW_CW_X_POLATE = false
-const DBG_NET_PRINT_DEBUG = false
-const DBG_DRAW_TANK_4_VECTORS = false
-const DBG_DRAW_TANK_ANGLE = false
+var DBG_CW_X_POLATE = false
+var DBG_CW_INB = false
+var DBG_CW_WSTATE = false
+var DBG_CW_DATA_CLI = false
+var DBG_NET_PRINT_DEBUG = false
+var DBG_DRAW_TANK_4_VECTORS = false
+var DBG_DRAW_TANK_ANGLE = false
 
 #var process_physics_delta_tick  : float = 0.0
 #var process_physics_delta 		: float = 0.0

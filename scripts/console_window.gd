@@ -8,7 +8,7 @@ var console_history_cache_line_size	= 1000
 
 #var Pconsole_Window 	= preload ("res://scenes/consoleWindow.tscn")
 var dbg_history 	: PoolStringArray	= []
-var console_window 	: HBoxContainer
+var console_window 	: Control
 var console_label 	: Label
 var console_vscroll : VScrollBar
 
