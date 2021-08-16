@@ -29,6 +29,9 @@ var right_angle_vec := Vector2.RIGHT
 var rear_angle_vec  := Vector2.DOWN
 var left_angle_vec  := Vector2.LEFT
 
+var input_right_left 	:= 0.0
+var input_up_down		:= 0.0
+
 #func set_speed(new_value):
 #	speed_previous = speed
 #	speed = new_value
@@ -44,22 +47,22 @@ func _ready():
 func _process(delta):
 	pass
 
-func _input(event):
-	pass
-		
-
 func _physics_process(delta):
 	if server_mode:
 		pass
-	else : 	
-		if cli_owner:
-			angle_last_input_change = deg2rad( (Input.get_action_strength("ui_right")-Input.get_action_strength("ui_left"))*200*delta )  #1 degré en radian *3
-			self.angle += angle_last_input_change
-			speed_last_input_change = (Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")) * 1500*delta
-			self.speed += speed_last_input_change
-			move_it(delta)
-		
+	elif cli_owner:
+		apply_input(delta)
+		move_it(delta)
 
+func _input(event):
+	input_right_left	= Input.get_action_strength("ui_right")-Input.get_action_strength("ui_left")
+	input_up_down 		= Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")
+
+func apply_input(delta):
+	angle_last_input_change = deg2rad( input_right_left *200*delta )
+	angle += angle_last_input_change
+	speed_last_input_change = input_up_down * 1500*delta
+	speed += speed_last_input_change
 
 func physic_extrapolate(delta):
 	angle = angle + angle_last_input_change

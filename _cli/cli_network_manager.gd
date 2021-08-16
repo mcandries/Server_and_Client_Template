@@ -3,7 +3,7 @@ extends Node
 
 signal connected_to_server
 signal disconnected_from_server
-signal players_infos_updated
+signal server_infos_updated
 
 ################################### Settings
 var cliLatencyUpdateFrequency = 0.5 #in seconds
@@ -19,7 +19,7 @@ var cliNetLastLatency 	: int
 
 var server_ip   : String
 
-var players_infos = {}
+var server_infos = {}
 var players_list = {}
 var is_game_owner = false
 
@@ -29,7 +29,7 @@ var srv_ask_for_connected_player_info = false  #workaround for server refuse con
 func init_var():
 	networkENet = NetworkedMultiplayerENet.new()
 	players_list = {}
-	players_infos = {}
+	server_infos = {}
 	is_game_owner = false
 	srv_ask_for_connected_player_info = false
 	server_ip = ""
@@ -182,8 +182,8 @@ puppet func C_RCV_ping (client_initial_tick):
 	cliNetLastLatency = clamp (net_latency, 0, INF)
 #	cw.prints(["C_RCV_ping",client_initial_tick, final_tick]  )
 
-puppet func C_RCV_players_infos (received_players_infos):
-	players_infos = received_players_infos
-	players_list = players_infos["players_list"]
-	is_game_owner = ( players_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
-	emit_signal("players_infos_updated")
+puppet func C_RCV_server_infos (received_server_infos):
+	server_infos = received_server_infos
+	players_list = server_infos["players_list"]
+	is_game_owner = ( server_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
+	emit_signal("server_infos_updated")

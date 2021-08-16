@@ -1,8 +1,10 @@
 extends Control
 
 var superGuiLobby = preload ("res://_srv/super_gui/super_gui_lobby.tscn")
+var superGuiSrvEngineInfos = preload ("res://_srv/super_gui/super_gui_srv_engine_infos.tscn")
 
 var lobbyVisible = false
+var srvEngineInfosVisible = false
 
 func _ready():
 	pass
@@ -32,3 +34,12 @@ func _on_ButtonStopServer_pressed():
 func _on_ButtonKillTree_pressed():
 	srvtree_manager.switch_active_tree()
 	srvtree_manager.kill_srvtree()
+
+
+func _on_ButtonSrvEngineInfos_pressed():
+	srvEngineInfosVisible = !srvEngineInfosVisible
+	if srvEngineInfosVisible : 
+		var srvEngineInfos = superGuiSrvEngineInfos.instance()
+		self.add_child(srvEngineInfos, true)
+	else:
+		get_node("SuperGuisSrvEnginesInfos").queue_free()

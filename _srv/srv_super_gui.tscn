@@ -68,7 +68,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonSrvEngineInfos" type="Button" parent="VBoxRight"]
+margin_top = 144.0
+margin_right = 400.0
+margin_bottom = 188.0
+text = "Srv Engine Infos"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="VBoxLeft/ButtonFS" to="." method="_on_ButtonFS_pressed"]
 [connection signal="pressed" from="VBoxRight/ButtonLobby" to="." method="_on_Button_pressed"]
 [connection signal="pressed" from="VBoxRight/ButtonStopServer" to="." method="_on_ButtonStopServer_pressed"]
 [connection signal="pressed" from="VBoxRight/ButtonKillTree" to="." method="_on_ButtonKillTree_pressed"]
+[connection signal="pressed" from="VBoxRight/ButtonSrvEngineInfos" to="." method="_on_ButtonSrvEngineInfos_pressed"]

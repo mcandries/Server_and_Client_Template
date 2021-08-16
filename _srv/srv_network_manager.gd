@@ -26,8 +26,15 @@ var server_public_ip = ""
 
 var latencyTimers := []
 
+var server_infos = {}
 var players_list = {}
-var players_infos = {}
+
+const server_infos_template = {
+		"players_list" : {
+			12548 : {}
+		},
+		"game_owner_peerid" : 1
+	}
 
 const player_template = {
 	"player_name" : "",
@@ -41,7 +48,7 @@ func init_var():
 	networkENet = NetworkedMultiplayerENet.new()
 	upnp = UPNP.new()
 	players_list = {}
-	players_infos = {
+	server_infos = {
 		"players_list" : players_list,
 		"game_owner_peerid" : 1
 	}
@@ -127,7 +134,7 @@ func StopServer():
 				cw.print("[SRV] Deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
 			else : 
 				cw.print("[SRV] Error while trying to deleted Upnp open port " + str(upnpOpenedPort) + " on gateway")
-	players_infos = {}
+	server_infos = {}
 	players_list = {}
 	srv_unload_level()
 	cw.print("[SRV]Server stopped")
@@ -137,21 +144,21 @@ func StopServer():
 func _Peer_Connected (peerId):
 	players_list[peerId] = player_template.duplicate(true)
 	if players_list.size()==1: 	# First player to join is the game_owner
-		players_infos["game_owner_peerid"] = peerId
+		server_infos["game_owner_peerid"] = peerId
 	rpc_id(peerId, "C_EMT_connected_player_info")
 	cw.print("[SRV] New player connected ("+str(peerId) +")")
 
 func _Peer_Disconnected (peerId):
-	if peerId == players_infos["game_owner_peerid"]: # if GameOwner Leave, someone else besome game_owner
+	if peerId == server_infos["game_owner_peerid"]: # if GameOwner Leave, someone else besome game_owner
 		if players_list.size()>1:
 			for p in players_list:
 				if p != peerId:
-					players_infos["game_owner_peerid"] = p
+					server_infos["game_owner_peerid"] = p
 					break
 
 	emit_signal("player_left", peerId)
 	players_list.erase(peerId) 
-	players_infos_updated()
+	server_infos_updated()
 	cw.print("[SRV] Player disconnected ("+str(peerId) +")")
 
 	
@@ -160,7 +167,7 @@ func _on_latencyTimer_timeout():
 #	cw.prints(["srv ask", get_tree().get_frame()])
 	rpc_unreliable ("C_EMT_ping", OS.get_ticks_msec()) #call on all connected peer
 #	get_tree().multiplayer.poll()
-	players_infos_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
+	server_infos_updated()  #not the best place because we don't already get the new ping, but it make a unique players_list update
 
 func srv_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(load("res://_srv/scripts/srv_gameengine.gd"))
@@ -173,6 +180,8 @@ func srv_change_level (level):
 	get_tree().root.get_node("/root/RootScene/ActiveScene")._ready_level(level)
 
 func srv_unload_level ():
+	if get_tree().root.get_node("/root/RootScene/ActiveScene").has_method("_exit_tree"):
+		get_tree().root.get_node("/root/RootScene/ActiveScene")._exit_tree()
 	get_tree().root.get_node("/root/RootScene/ActiveScene").set_script(Reference.new())
 
 func srv_process_level():
@@ -189,14 +198,14 @@ func reset_all_players_level_loaded():
 ####### RPC Functions
 #######
 
-func players_infos_updated():
+func server_infos_updated():
 	#########################
 	######################### Should clean the players_list before sending it to peers
-	rpc ("C_RCV_players_infos", players_infos)
+	rpc ("C_RCV_server_infos", server_infos)
 
 remote func S_RCV_ask_launching_game():
 	var peerId = get_tree().get_rpc_sender_id()
-	if peerId == players_infos["game_owner_peerid"]:
+	if peerId == server_infos["game_owner_peerid"]:
 		reset_all_players_level_loaded()
 		var all_ready = true
 		for p in players_list:
@@ -225,19 +234,19 @@ remote func S_RCV_level_loaded(level):
 remote func S_RCV_connected_player_info (player_infos):
 	var peerId = get_tree().get_rpc_sender_id()
 	players_list[peerId]["player_name"] = player_infos.player_name
-	players_infos_updated()
+	server_infos_updated()
 	cw.prints (["[SRV] Player connected", peerId, "is", players_list[peerId].player_name])
 
 
 remote func S_RCV_player_ready_status (ready):
 	var peerId = get_tree().get_rpc_sender_id()
 	players_list[peerId]["ready"] = ready	
-	players_infos_updated()
+	server_infos_updated()
 
 remote func S_RCV_kick_player (peerID_to_kick : int):
 	var peerId = get_tree().get_rpc_sender_id()
-	if peerId == players_infos["game_owner_peerid"]:
-		if peerID_to_kick != players_infos["game_owner_peerid"]:
+	if peerId == server_infos["game_owner_peerid"]:
+		if peerID_to_kick != server_infos["game_owner_peerid"]:
 			networkENet.disconnect_peer(peerID_to_kick)
 
 remote func S_RCV_ping (server_initial_tick, client_tick):

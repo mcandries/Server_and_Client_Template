@@ -13,7 +13,7 @@ var ArrayListPeerId = []
 var ready = false
 
 func _ready():
-	gb.cli_network_manager.connect("players_infos_updated", self, "_on_players_infos_updated")
+	gb.cli_network_manager.connect("server_infos_updated", self, "_on_server_infos_updated")
 	gb.cli_network_manager.connect("disconnected_from_server", self, "_on_disconnected_from_server")
 	
 	$Center/VBox/LabelServerName.text = "Connected to server " + gb.cli_network_manager.server_ip
@@ -27,7 +27,6 @@ func _ready():
 	buttonKick			= $Center/VBox/HBox/VBox/HBox/ButtonKick
 	
 	buttonLaunch.visible = false
-	#_on_players_infos_updated()
 	
 	
 
@@ -37,7 +36,7 @@ func _process(delta):
 	else:
 		buttonKick.disabled = false
 
-func _on_players_infos_updated():
+func _on_server_infos_updated():
 	var selected_peerID = -1
 	if itemListPlayers.get_selected_items().size()>0:
 		selected_peerID = ArrayListPeerId [itemListPlayers.get_selected_items()[0]]
@@ -51,7 +50,7 @@ func _on_players_infos_updated():
 	for key in gb.cli_network_manager.players_list:
 		var player = gb.cli_network_manager.players_list[key]
 		var ownerText
-		if gb.cli_network_manager.players_infos["game_owner_peerid"] == key :
+		if gb.cli_network_manager.server_infos["game_owner_peerid"] == key :
 			ownerText = "√"
 		else:
 			ownerText = ""
@@ -71,10 +70,10 @@ func _on_players_infos_updated():
 		if s != -1:
 			itemListPlayers.select(s)
 
-	buttonLaunch.visible = ( gb.cli_network_manager.players_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
+	buttonLaunch.visible = ( gb.cli_network_manager.server_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
 	buttonLaunch.disabled = !all_ready
 	
-	buttonKick.visible = ( gb.cli_network_manager.players_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
+	buttonKick.visible = ( gb.cli_network_manager.server_infos["game_owner_peerid"] == get_tree().get_network_unique_id() )
 	buttonKick.disabled = ( itemListPlayers.get_selected_items().size() < 1 )
 
 func _on_disconnected_from_server():

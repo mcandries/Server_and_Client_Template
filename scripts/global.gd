@@ -3,15 +3,20 @@ extends Node
 var cli_network_manager : Cli_Network_Manager
 var srv_network_manager : Srv_Network_Manager
 
+var srv_game_engine : Srv_Game_Engine
+var cli_game_engine : Cli_Game_Engine
+
+
 var project_design_width  : int = ProjectSettings.get_setting("display/window/size/width")
 var project_design_height : int = ProjectSettings.get_setting("display/window/size/height")
 
-var cli_game_engine : Cli_Game_Engine
 
+var DBG_NET_SRV_LOST_PACKET_SEND = 2  # 0 for 0%, 1 for 100%, 2 for 50%, 3 for 33%, 4 for 25 %, 5 for 20%, etc.
+var DBG_NET_CLI_LOST_PACKET_SEND = 2  # 0 for 0%, 1 for 100%, 2 for 50%, 3 for 33%, 4 for 25 %, 5 for 20%, etc.
 var DBG_CW_X_POLATE = false
 var DBG_CW_INB = false
 var DBG_CW_WSTATE = false
-var DBG_CW_DATA_CLI = false
+var DBG_CW_SRV_DELTA_INB = false
 var DBG_NET_PRINT_DEBUG = false
 var DBG_DRAW_TANK_4_VECTORS = false
 var DBG_DRAW_TANK_ANGLE = false

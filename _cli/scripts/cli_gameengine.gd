@@ -1,7 +1,6 @@
 class_name Cli_Game_Engine
 extends CPreloader
 
-
 var cli_levelscene : Node2D
 
 var current_INB = 0
@@ -45,6 +44,7 @@ var ST_last_received_wstate : int = 0
 var cli_players_tanks_nodes = {}
 var my_tank : CTank
 var input_vector := Vector2 (0,0)
+
 
 #done by cl_network_manager when changing level
 func _ready_level(level):
@@ -222,9 +222,6 @@ func cli_extrapolate_objects(delta):
 			tankVAL.physic_extrapolate(delta)
 
 
-
-
-	
 ########
 ######## RPC
 ########
@@ -250,18 +247,33 @@ func delete_player_tank (tankID : String):
 
 func send_position_to_server(INB):
 
+	if gb.DBG_NET_CLI_LOST_PACKET_SEND and (randi() % gb.DBG_NET_CLI_LOST_PACKET_SEND):
+		return
+	
 	if is_instance_valid(my_tank):
 		var msg = {
 			"INB"	: INB,
-			"PosX" 	: my_tank.kinematic_node.position.x,
-			"PosY" 	: my_tank.kinematic_node.position.y,
-			"Rot"  	: my_tank.kinematic_node.rotation,
-			"Speed"	: my_tank.speed,
-			"Speed_last_input_change" : my_tank.speed_last_input_change,
-			"Angle"	: my_tank.angle,
-			"Angle_last_input_change" : my_tank.angle_last_input_change,
+			"Tank" : {
+#				"PosX" 	: my_tank.kinematic_node.position.x,
+#				"PosY" 	: my_tank.kinematic_node.position.y,
+#				"Rot"  	: my_tank.kinematic_node.rotation,
+#				"Speed"	: my_tank.speed,
+#				"Speed_last_input_change" : my_tank.speed_last_input_change,
+#				"Angle"	: my_tank.angle,
+#				"Angle_last_input_change" : my_tank.angle_last_input_change,
+				"Input_right_left" : my_tank.input_right_left,
+				"Input_up_down" : my_tank.input_up_down,
+			},
+			"Cli_engine_infos" : {
+				"cli_ws_next_buffer_size" : cli_ws_next_buffer_size,
+				"total_frame_with_wstate" : total_frame_with_wstate,
+				"total_frame_interpolated" : total_frame_interpolated,
+				"total_frame_extrapolated" : total_frame_extrapolated
+				
+			}
 		}
 		rpc_unreliable_id(1, "S_RCV_player_position", msg)
+#		rpc_id(1, "S_RCV_player_position", msg)  # we don't want to miss a key pressed !
 
 #received when server ending is ready_level step
 puppet func C_RCV_ready_level (level):
